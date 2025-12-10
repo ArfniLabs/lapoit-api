@@ -10,8 +10,8 @@ spring:
   config.import: application-dev.yml
 
 ---
-spring:
-  config:
-    activate:
-      on-profile: prod
-  config.import: application-prod.yml
+#spring:
+#  config:
+#    activate:
+#      on-profile: prod
+#  config.import: application-prod.yml
