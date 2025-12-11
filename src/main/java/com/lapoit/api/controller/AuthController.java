@@ -1,9 +1,10 @@
 package com.lapoit.api.controller;
 
 
-import com.lapoit.api.dto.LoginRequestDto;
-import com.lapoit.api.dto.SignupRequestDto;
-import com.lapoit.api.dto.TokenResponseDto;
+import com.lapoit.api.dto.ApiResponseDto;
+import com.lapoit.api.dto.auth.LoginRequestDto;
+import com.lapoit.api.dto.auth.SignupRequestDto;
+import com.lapoit.api.dto.auth.TokenResponseDto;
 import com.lapoit.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +23,21 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequestDto request) {
+    public ResponseEntity<?> signup(@RequestBody SignupRequestDto request) {
         authService.signup(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "회원가입 성공", null)
+        );
+
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponseDto> login(@RequestBody LoginRequestDto request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestDto request) {
         TokenResponseDto tokenResponse = authService.login(request);
-        return ResponseEntity.ok(tokenResponse);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "로그인 성공", tokenResponse)
+        );
     }
 
 }

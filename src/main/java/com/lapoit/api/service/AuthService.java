@@ -2,9 +2,9 @@ package com.lapoit.api.service;
 
 
 import com.lapoit.api.domain.User;
-import com.lapoit.api.dto.LoginRequestDto;
-import com.lapoit.api.dto.SignupRequestDto;
-import com.lapoit.api.dto.TokenResponseDto;
+import com.lapoit.api.dto.auth.LoginRequestDto;
+import com.lapoit.api.dto.auth.SignupRequestDto;
+import com.lapoit.api.dto.auth.TokenResponseDto;
 import com.lapoit.api.jwt.JwtTokenProvider;
 import com.lapoit.api.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;

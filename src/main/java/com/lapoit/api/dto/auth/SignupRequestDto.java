@@ -1,4 +1,4 @@
-package com.lapoit.api.dto;
+package com.lapoit.api.dto.auth;
 
 
 
