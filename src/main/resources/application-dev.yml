@@ -1,0 +1,32 @@
+server:
+  port: ${SPRING_BACKEND_PORT}
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL_DEV}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  datasource.hikari:
+    maximum-pool-size: 10
+    minimum-idle: 2
+    idle-timeout: 20000
+    max-lifetime: 1200000
+    connection-timeout: 10000
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.lapoit.domain
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+jwt:
+  secret: YmVzdHNlY3JldGtleWluYmFzZTY0ZW5jb2RlZGZvcnNoYTI1Ng==
+  access-token-validity: 3600
+  refresh-token-validity: 360000
+
+logging:
+  level:
+    com.zaxxer.hikari: DEBUG
