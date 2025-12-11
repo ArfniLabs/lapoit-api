@@ -12,4 +12,5 @@ public interface TempUserMapper {
     TempUser findByUserId(@Param("userId") String userId);
 
 
+    TempUser findByNickname(@Param("userNickname") String userNickname);
 }

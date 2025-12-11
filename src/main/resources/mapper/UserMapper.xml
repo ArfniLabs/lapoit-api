@@ -26,6 +26,12 @@
         WHERE user_id = #{userId}
     </select>
 
+    <select id="findByNickname" parameterType="string" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+        WHERE user_nickname = #{userNickname}
+    </select>
+
     <select id="findById" parameterType="long" resultMap="UserResultMap">
         SELECT *
         FROM user

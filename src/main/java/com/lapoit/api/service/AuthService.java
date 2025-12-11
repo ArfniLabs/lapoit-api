@@ -28,6 +28,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    private void checkExistenceAndThrow(Object existing, Object existingTemp, ErrorCode errorCode) {
+        if (existing != null || existingTemp != null) {
+            throw new CustomException(errorCode);
+        }
+    }
+
     @Transactional
     public void signup(SignupRequestDto requestDto) {
 
@@ -85,16 +91,18 @@ public class AuthService {
         return TokenResponseDto.of(accessToken, refreshToken, accessTokenValidity);
     }
 
+
     public void checkId(String userId) {
         User existing = userMapper.findByUserId(userId);
         TempUser existingTemp = tempUserMapper.findByUserId(userId);
 
-        if (existing != null) {
-            throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
-        }
-        if (existingTemp != null) {
-            throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
-        }
+        checkExistenceAndThrow(existing, existingTemp, ErrorCode.ID_ALREADY_EXISTS);
+    }
 
+    public void checkNickName(String userNickname) {
+        User existing = userMapper.findByNickname(userNickname);
+        TempUser existingTemp = tempUserMapper.findByNickname(userNickname);
+
+        checkExistenceAndThrow(existing, existingTemp, ErrorCode.NICKNAME_ALREADY_EXISTS);
     }
 }

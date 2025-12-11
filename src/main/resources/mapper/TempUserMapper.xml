@@ -23,7 +23,7 @@
 
     <insert id="save" parameterType="com.lapoit.api.domain.TempUser"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (
+        INSERT INTO temp_user (
         user_id, user_pw, user_name, store_id, phone_number,
         user_nickname, role, code, status, create_at, update_at
         ) VALUES (
@@ -34,8 +34,14 @@
 
     <select id="findByUserId" parameterType="string" resultMap="UserResultMap">
         SELECT *
-        FROM user
+        FROM temp_user
         WHERE user_id = #{userId}
+    </select>
+
+    <select id="findByNickname" parameterType="string" resultMap="UserResultMap">
+        SELECT *
+        FROM temp_user
+        WHERE user_nickname = #{userNickname}
     </select>
 
 </mapper>

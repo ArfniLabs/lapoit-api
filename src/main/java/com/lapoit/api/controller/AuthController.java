@@ -40,7 +40,7 @@ public class AuthController {
     //닉네임 중복
     @GetMapping("/check-nickname")
     public ResponseEntity<?> checkNickName(@RequestParam String userNickname) {
-
+        authService.checkNickName(userNickname);
         return ResponseEntity.ok(
                 ApiResponseDto.success("Auth-200", "닉네임 중복 확인 성공", null)
         );
