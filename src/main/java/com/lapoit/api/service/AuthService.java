@@ -84,4 +84,17 @@ public class AuthService {
 
         return TokenResponseDto.of(accessToken, refreshToken, accessTokenValidity);
     }
+
+    public void checkId(String userId) {
+        User existing = userMapper.findByUserId(userId);
+        TempUser existingTemp = tempUserMapper.findByUserId(userId);
+
+        if (existing != null) {
+            throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
+        }
+        if (existingTemp != null) {
+            throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
+        }
+
+    }
 }

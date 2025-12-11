@@ -32,4 +32,10 @@
         )
     </insert>
 
+    <select id="findByUserId" parameterType="string" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+        WHERE user_id = #{userId}
+    </select>
+
 </mapper>

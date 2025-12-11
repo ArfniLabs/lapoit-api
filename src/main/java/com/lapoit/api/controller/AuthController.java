@@ -32,7 +32,7 @@ public class AuthController {
     //아이디 중복 (temp 와 user 둘다 모두다 중복확인 거처야한다)
     @GetMapping("/check-id")
     public ResponseEntity<?> checkId(@RequestParam String userId) {
-
+        authService.checkId(userId);
         return ResponseEntity.ok(
                 ApiResponseDto.success("Auth-200", "아이디 중복 확인 성공", null)
         );
