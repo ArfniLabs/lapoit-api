@@ -9,7 +9,7 @@ public enum ErrorCode {
     // 유저 관련
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER-404", "존재하지 않는 사용자입니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "USER-400", "비밀번호가 올바르지 않습니다."),
-
+    ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "USER-4031", "비활성화된 계정입니다."),
     // 인증/인가
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH-401", "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH-403", "접근 권한이 없습니다."),

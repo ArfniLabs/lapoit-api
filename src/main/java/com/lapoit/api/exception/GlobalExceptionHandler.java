@@ -1,7 +1,6 @@
 package com.lapoit.api.exception;
 
 import com.lapoit.api.dto.ApiResponseDto;
-import com.lapoit.api.exception.custom.CustomException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

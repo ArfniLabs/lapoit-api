@@ -1,6 +1,4 @@
-package com.lapoit.api.exception.custom;
-
-import com.lapoit.api.exception.ErrorCode;
+package com.lapoit.api.exception;
 
 public class CustomException extends RuntimeException {
     private final ErrorCode errorCode;

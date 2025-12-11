@@ -1,11 +1,15 @@
 package com.lapoit.api.service;
 
 
+import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.domain.User;
 import com.lapoit.api.dto.auth.LoginRequestDto;
 import com.lapoit.api.dto.auth.SignupRequestDto;
 import com.lapoit.api.dto.auth.TokenResponseDto;
+import com.lapoit.api.exception.CustomException;
+import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.jwt.JwtTokenProvider;
+import com.lapoit.api.mapper.TempUserMapper;
 import com.lapoit.api.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserMapper userMapper;
+    private final TempUserMapper tempUserMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -32,8 +37,8 @@ public class AuthService {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
 
-        // 2) 새 유저 생성
-        User user = User.builder()
+        // 2) 새 유저 생성 (임시 유저 테이블에 저장)
+        TempUser user = TempUser.builder()
                 .userId(requestDto.getUserId())
                 .userPw(passwordEncoder.encode(requestDto.getPassword()))
                 .userName(requestDto.getUserName())
@@ -44,7 +49,7 @@ public class AuthService {
                 .status("ACTIVE")      // 기본 상태
                 .build();
 
-        userMapper.save(user);
+        tempUserMapper.save(user);
     }
 
     public TokenResponseDto login(LoginRequestDto requestDto){
@@ -52,20 +57,20 @@ public class AuthService {
         User user=userMapper.findByUserId(requestDto.getUserId());
 
         if(user ==null){
-            throw new UsernameNotFoundException("존재하지 않는 아이디");
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
 
         }
 
 
         //비번 검증
         if(!passwordEncoder.matches(requestDto.getPassword(),user.getUserPw())){
-            throw new BadCredentialsException("비번이 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
 
         }
 
         //계정상태 확인
         if (!"ACTIVE".equals(user.getStatus())) {
-            throw new IllegalStateException("비활성화된 계정입니다.");
+            throw new CustomException(ErrorCode.ACCOUNT_DISABLED);
         }
 
 

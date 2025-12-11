@@ -6,12 +6,10 @@ import com.lapoit.api.dto.auth.LoginRequestDto;
 import com.lapoit.api.dto.auth.SignupRequestDto;
 import com.lapoit.api.dto.auth.TokenResponseDto;
 import com.lapoit.api.service.AuthService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 // 로그인 / 회원가입/ 재발급 / 로그아웃
 
@@ -30,6 +28,27 @@ public class AuthController {
         );
 
     }
+
+    //아이디 중복 (temp 와 user 둘다 모두다 중복확인 거처야한다)
+    @GetMapping("/check-id")
+    public ResponseEntity<?> checkId(@RequestParam String userId) {
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "아이디 중복 확인 성공", null)
+        );
+    }
+    //닉네임 중복
+    @GetMapping("/check-nickname")
+    public ResponseEntity<?> checkNickName(@RequestParam String userNickname) {
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "닉네임 중복 확인 성공", null)
+        );
+    }
+    //지점 불러오기
+
+
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto request) {

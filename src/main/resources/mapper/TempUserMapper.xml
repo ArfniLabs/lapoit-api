@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.TempUserMapper">
+
+    <resultMap id="UserResultMap" type="com.lapoit.api.domain.TempUser">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userPw" column="user_pw"/>
+        <result property="userName" column="user_name"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="storeId" column="store_id"/>
+        <result property="phoneNumber" column="phone_number"/>
+        <result property="role" column="role"/>
+        <result property="code" column="code"/>
+        <result property="status" column="status"/>
+        <result property="createAt" column="create_at"/>
+        <result property="updateAt" column="update_at"/>
+    </resultMap>
+
+
+    <insert id="save" parameterType="com.lapoit.api.domain.TempUser"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (
+        user_id, user_pw, user_name, store_id, phone_number,
+        user_nickname, role, code, status, create_at, update_at
+        ) VALUES (
+        #{userId}, #{userPw}, #{userName}, #{storeId}, #{phoneNumber},
+        #{userNickname}, #{role}, #{code}, #{status}, NOW(), NOW()
+        )
+    </insert>
+
+</mapper>
