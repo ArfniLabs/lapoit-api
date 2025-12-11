@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.StoreMapper">
+
+    <!-- 지점 단건 조회 -->
+    <select id="findById" parameterType="long" resultType="com.lapoit.api.domain.Store">
+        SELECT store_id AS storeId,
+               store_name AS storeName,
+               store_phone AS storePhone,
+               store_address AS storeAddress
+        FROM store
+        WHERE store_id = #{storeId}
+    </select>
+
+    <!-- 전체 지점 조회 -->
+    <select id="findAll" resultType="com.lapoit.api.domain.Store">
+        SELECT store_id AS storeId,
+               store_name AS storeName,
+               store_phone AS storePhone,
+               store_address AS storeAddress
+        FROM store
+    </select>
+
+    <!-- 지점 생성 -->
+    <insert id="insertStore" parameterType="com.lapoit.api.domain.Store" useGeneratedKeys="true" keyProperty="storeId">
+        INSERT INTO store (store_name, store_phone, store_address)
+        VALUES (#{storeName}, #{storePhone}, #{storeAddress})
+    </insert>
+
+
+    <!-- 지점 수정 -->
+    <update id="updateStore" parameterType="com.lapoit.api.domain.Store">
+        UPDATE store
+        SET store_name = #{storeName},
+            store_phone = #{storePhone},
+            store_address = #{storeAddress}
+        WHERE store_id = #{storeId}
+    </update>
+
+    <!-- 지점 삭제 -->
+    <delete id="deleteStore" parameterType="long">
+        DELETE FROM store
+        WHERE store_id = #{storeId}
+    </delete>
+
+</mapper>
