@@ -50,6 +50,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .subject(userId)
                 .claim("role", role)
+
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(secretKey, Jwts.SIG.HS256)
@@ -82,6 +83,8 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
+
 
     public String getUserId(String token) {
         return Jwts.parser()

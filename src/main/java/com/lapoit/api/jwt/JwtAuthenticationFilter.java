@@ -25,9 +25,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = jwtTokenProvider.resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+//        System.out.println("[JWT] uri=" + request.getRequestURI());
+//        System.out.println("[JWT] authorization=" + request.getHeader("Authorization"));
+//        System.out.println("[JWT] tokenNull=" + (token == null));
+
+        boolean valid = token != null && jwtTokenProvider.validateToken(token);
+//        System.out.println("[JWT] valid=" + valid);
+
+        if (valid) {
+            try {
+//                System.out.println("[JWT] userId=" + jwtTokenProvider.getUserId(token));
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+//                System.out.println("[JWT] auth=" + authentication.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (Exception e) {
+                e.printStackTrace(); // loadUserByUsername 실패 등 잡아냄
+            }
         }
 
         filterChain.doFilter(request, response);

@@ -51,8 +51,9 @@ public class AuthService {
                 .userNickname(requestDto.getUserNickname())
                 .storeId(requestDto.getStoreId())
                 .phoneNumber(requestDto.getPhoneNumber())
+                .code(requestDto.getCode())
                 .role("USER")          // 기본 권한
-                .status("ACTIVE")      // 기본 상태
+                .status("PENDING")      // 기본 상태 임시 대기임으로                 .status("ACTIVE")
                 .build();
 
         tempUserMapper.save(user);

@@ -44,4 +44,20 @@
         WHERE user_nickname = #{userNickname}
     </select>
 
+
+
+    <select id="finTempUsersById" resultMap="UserResultMap">
+        SELECT
+        id, user_id, user_name, user_nickname, store_id,
+        phone_number, role, code, status, create_at, update_at
+        FROM temp_user
+        WHERE store_id = #{storeId}
+        AND status = 'PENDING'
+    </select>
+
+    <delete id="deleteByUserId">
+        DELETE FROM temp_user
+        WHERE user_id = #{userId}
+    </delete>
+
 </mapper>
