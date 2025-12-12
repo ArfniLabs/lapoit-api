@@ -23,7 +23,7 @@ public class StoreService {
         Store store = storeMapper.findById(storeId);
 
         if (store == null) {
-            //throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+            throw new CustomException(ErrorCode.STORE_NOT_FOUND);
         }
 
         return StoreResponseDto.builder()
@@ -70,7 +70,7 @@ public class StoreService {
 
         Store store = storeMapper.findById(storeId);
         if (store == null) {
-           // throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+            throw new CustomException(ErrorCode.STORE_NOT_FOUND);
         }
 
         store.setStoreName(dto.getStoreName());
@@ -85,7 +85,7 @@ public class StoreService {
     public void deleteStore(Long storeId) {
         Store store = storeMapper.findById(storeId);
         if (store == null) {
-           // throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+            throw new CustomException(ErrorCode.STORE_NOT_FOUND);
         }
 
         storeMapper.deleteStore(storeId);

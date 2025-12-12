@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.GameBlindMapper">
+
+    <insert id="insertBlind">
+        INSERT INTO game_blind
+        (game_id, level, small_blind, big_blind, ante, duration)
+        VALUES
+        (#{gameId}, #{level}, #{smallBlind}, #{bigBlind}, #{ante}, #{duration})
+    </insert>
+
+    <select id="findByGameId" resultType="com.lapoit.api.domain.GameBlind">
+        SELECT level, small_blind, big_blind, ante, duration
+        FROM game_blind
+        WHERE game_id = #{gameId}
+        ORDER BY level ASC
+    </select>
+
+    <update id="patchGameBlind">
+        UPDATE game_blind
+        <set>
+            <if test="dto.smallBlind != null">
+                small_blind = #{dto.smallBlind},
+            </if>
+            <if test="dto.bigBlind != null">
+                big_blind = #{dto.bigBlind},
+            </if>
+            <if test="dto.ante != null">
+                ante = #{dto.ante},
+            </if>
+            <if test="dto.duration != null">
+                duration = #{dto.duration},
+            </if>
+        </set>
+        WHERE game_id = #{gameId}
+        AND level = #{dto.level}
+    </update>
+
+
+
+    <delete id="deleteByGameId">
+        DELETE FROM game_blind WHERE game_id = #{gameId}
+    </delete>
+
+</mapper>

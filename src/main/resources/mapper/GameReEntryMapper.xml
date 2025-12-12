@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.GameReEntryMapper">
+
+    <insert id="insertReEntry">
+        INSERT INTO game_re_entry
+        (game_id, re_entry_count, re_entry_price, re_entry_stack)
+        VALUES
+        (#{gameId}, #{reEntryCount}, #{reEntryPrice}, #{reEntryStack})
+    </insert>
+
+    <select id="findByGameId" resultType="com.lapoit.api.domain.GameReEntry">
+        SELECT re_entry_count, re_entry_price, re_entry_stack
+        FROM game_re_entry
+        WHERE game_id = #{gameId}
+    </select>
+
+    <update id="patchGameReEntry">
+        UPDATE game_re_entry
+        <set>
+            <if test="dto.price != null">
+                re_entry_price = #{dto.price},
+            </if>
+            <if test="dto.stack != null">
+                re_entry_stack = #{dto.stack},
+            </if>
+        </set>
+        WHERE game_id = #{gameId}
+        AND re_entry_count = #{count}
+    </update>
+
+
+    <delete id="deleteByGameId">
+        DELETE FROM game_re_entry WHERE game_id = #{gameId}
+    </delete>
+
+</mapper>

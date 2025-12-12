@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.GameMapper">
+
+    <insert id="insertGame" useGeneratedKeys="true" keyProperty="gameId">
+        INSERT INTO game
+        (game_name, game_stack, game_price, game_limit, buyin_end_level, game_end_level)
+        VALUES
+        (#{gameName}, #{gameStack}, #{gamePrice}, #{gameLimit},
+        #{buyinEndLevel}, #{gameEndLevel})
+    </insert>
+
+    <update id="updateGame">
+        UPDATE game
+        SET game_name = #{gameName},
+        game_stack = #{gameStack},
+        game_price = #{gamePrice},
+        game_limit = #{gameLimit},
+        buyin_end_level = #{buyinEndLevel},
+        game_end_level = #{gameEndLevel}
+        WHERE game_id = #{gameId}
+    </update>
+
+    <update id="patchGame">
+        UPDATE game
+        <set>
+            <if test="dto.gameName != null">
+                game_name = #{dto.gameName},
+            </if>
+
+            <if test="dto.gameStack != null">
+                game_stack = #{dto.gameStack},
+            </if>
+
+            <if test="dto.gamePrice != null">
+                game_price = #{dto.gamePrice},
+            </if>
+
+            <if test="dto.gameLimit != null">
+                game_limit = #{dto.gameLimit},
+            </if>
+
+            <if test="dto.buyinEndLevel != null">
+                buyin_end_level = #{dto.buyinEndLevel},
+            </if>
+
+            <if test="dto.gameEndLevel != null">
+                game_end_level = #{dto.gameEndLevel},
+            </if>
+        </set>
+        WHERE game_id = #{gameId}
+    </update>
+
+
+    <delete id="deleteGame">
+        DELETE FROM game WHERE game_id = #{gameId}
+    </delete>
+
+    <select id="findById" resultType="com.lapoit.api.domain.Game">
+        SELECT * FROM game WHERE game_id = #{gameId}
+    </select>
+
+    <select id="findAll" resultType="com.lapoit.api.domain.Game">
+        SELECT * FROM game ORDER BY game_id DESC
+    </select>
+
+</mapper>
