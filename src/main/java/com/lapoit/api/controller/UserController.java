@@ -32,6 +32,7 @@ public class UserController {
                 ApiResponseDto.success("USER-200", "개인정보 조회 성공", myInfo)
         );
     }
+
     //유저 정보 수정
     //비밀번호 변경
     //회원 탈퇴

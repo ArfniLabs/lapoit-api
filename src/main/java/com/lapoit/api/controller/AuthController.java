@@ -69,6 +69,8 @@ public class AuthController {
                 ApiResponseDto.success("Auth-200", "로그인 성공", tokenResponse)
         );
     }
+    //이쪽은 인증 권한필요
+    //로그아웃 ( lastLogoutAt 방식이면  으로 액세스 토큰 관리하자)
 
 }
 
