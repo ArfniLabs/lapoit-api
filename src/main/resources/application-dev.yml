@@ -15,6 +15,12 @@ spring:
     max-lifetime: 1200000
     connection-timeout: 10000
 
+  data:
+    redis:
+      host: ${API_BASE_URL2}
+      port: ${REDIS_PORT_DEV}
+      password: ${REDIS_PASSWORD}
+
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   type-aliases-package: com.lapoit.domain

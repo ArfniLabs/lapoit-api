@@ -3,6 +3,7 @@ package com.lapoit.api.controller;
 
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.auth.LoginRequestDto;
+import com.lapoit.api.dto.auth.RefreshTokenRequestDto;
 import com.lapoit.api.dto.auth.SignupRequestDto;
 import com.lapoit.api.dto.auth.TokenResponseDto;
 import com.lapoit.api.service.AuthService;
@@ -53,6 +54,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto request) {
         TokenResponseDto tokenResponse = authService.login(request);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "로그인 성공", tokenResponse)
+        );
+    }
+
+    //Refresh API
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody RefreshTokenRequestDto request) {
+        TokenResponseDto tokenResponse = authService.refresh(request);
 
         return ResponseEntity.ok(
                 ApiResponseDto.success("Auth-200", "로그인 성공", tokenResponse)

@@ -13,4 +13,5 @@ public interface  UserMapper {
     User findById(@Param("id") Long id);
 
     User findByNickname(@Param("userNickname") String userNickname);
+
 }
