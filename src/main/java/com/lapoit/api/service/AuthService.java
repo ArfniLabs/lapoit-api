@@ -150,4 +150,13 @@ public class AuthService {
 
 
     }
+
+    public void logout(String userId) {
+        //refresh  제거
+        redisTemplate.delete(userId);
+        //lastLogoutAt
+        long now = System.currentTimeMillis();
+        redisTemplate.opsForValue().set("LO:" + userId, String.valueOf(now));
+
+    }
 }

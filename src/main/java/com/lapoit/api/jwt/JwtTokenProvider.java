@@ -127,6 +127,18 @@ public class JwtTokenProvider {
         return null;
     }
 
+    public long getIssuedAtMillis(String token) {
+        return getClaims(token).getIssuedAt().getTime();
+    }
+
+    public Claims getClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
     //토큰 남은 시간 계산
     public long getRemainingTime(String token) {
         Date expiration = Jwts.parser()
