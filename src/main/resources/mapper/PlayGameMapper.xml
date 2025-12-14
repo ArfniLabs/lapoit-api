@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.PlayGameMapper">
+
+    <insert id="insertPlayGame">
+        INSERT INTO play_game (
+        store_id, game_id, game_subtitle, game_day,
+        game_status, total_stop_time
+        )
+        VALUES (
+        #{storeId}, #{gameId}, #{gameSubtitle},
+        CURDATE(), 'WAIT', 0
+        )
+    </insert>
+
+    <select id="selectLastInsertId" resultType="long">
+        SELECT LAST_INSERT_ID()
+    </select>
+
+    <select id="findStatusById" resultType="string">
+        SELECT game_status
+        FROM play_game
+        WHERE play_game_id = #{playGameId}
+    </select>
+
+    <update id="startPlayGame">
+        UPDATE play_game
+        SET game_status = 'STARTED',
+        start_at = NOW(),
+        level_start_at = NOW(),
+        game_level = 1
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+    <update id="pausePlayGame">
+        UPDATE play_game
+        SET game_status = 'PAUSED',
+        stop_time = NOW()
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+    <update id="resumePlayGame">
+        UPDATE play_game
+        SET
+        game_status = 'STARTED',
+        total_stop_time =
+        total_stop_time
+        + TIMESTAMPDIFF(SECOND, stop_time, NOW()),
+        stop_time = NULL
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+
+    <select id="findPlayGameById"
+            resultType="com.lapoit.api.dto.playgame.PlayGameResponse">
+        SELECT
+        pg.play_game_id   AS playGameId,
+        pg.game_id        AS gameId,
+        pg.store_id       AS storeId,
+        pg.game_subtitle  AS gameSubtitle,
+        pg.game_day       AS gameDay,
+        pg.start_at       AS startAt,
+        pg.level_start_at AS levelStartAt,
+        pg.game_level     AS gameLevel,
+        pg.total_people   AS totalPeople,
+        pg.now_people     AS nowPeople,
+        pg.rebuyin_count  AS rebuyinCount,
+        pg.total_stack    AS totalStack,
+        pg.average_stack  AS averageStack,
+        pg.game_status    AS gameStatus
+        FROM play_game pg
+        WHERE pg.play_game_id = #{playGameId}
+    </select>
+
+
+
+    <!-- 조회용 -->
+    <select id="findByStoreId"
+            resultType="com.lapoit.api.dto.playgame.PlayGameRow">
+        SELECT
+        pg.play_game_id,
+        pg.store_id,
+        pg.game_id,
+        g.game_name,
+        pg.game_subtitle,
+        pg.game_status,
+        pg.start_at,
+        pg.level_start_at,
+        pg.game_level,
+        pg.total_people,
+        pg.now_people,
+        pg.rebuyin_count,
+        pg.total_stack,
+        pg.average_stack,
+        pg.total_stop_time
+        FROM play_game pg
+        JOIN game g ON pg.game_id = g.game_id
+        WHERE pg.store_id = #{storeId}
+        ORDER BY pg.start_at DESC
+    </select>
+
+    <!-- ========================= -->
+    <!-- 스케줄러: 진행중 게임 조회 -->
+    <!-- ========================= -->
+    <select id="findStartedGames"
+            resultType="com.lapoit.api.dto.playgame.PlayGameRow">
+        SELECT
+        pg.play_game_id   AS playGameId,
+        pg.game_id        AS gameId,
+        pg.store_id       AS storeId,
+        pg.game_subtitle  AS gameSubtitle,
+        g.game_name       AS gameName,
+
+        pg.start_at       AS startAt,
+        pg.level_start_at AS levelStartAt,
+        pg.game_level     AS gameLevel,
+
+        pg.total_people   AS totalPeople,
+        pg.now_people     AS nowPeople,
+        pg.rebuyin_count  AS rebuyinCount,
+        pg.total_stack    AS totalStack,
+        pg.average_stack  AS averageStack,
+
+        pg.game_status    AS gameStatus,
+        pg.total_stop_time AS totalStopTime
+
+        FROM play_game pg
+        JOIN game g ON pg.game_id = g.game_id
+        WHERE pg.game_status = 'STARTED'
+    </select>
+
+    <!-- ========================= -->
+    <!-- 레벨 업 -->
+    <!-- ========================= -->
+    <update id="levelUp">
+        UPDATE play_game
+        SET
+        game_level = #{nextLevel},
+        level_start_at = NOW()
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+    <!-- ========================= -->
+    <!-- 게임 종료 -->
+    <!-- ========================= -->
+    <update id="finishGame">
+        UPDATE play_game
+        SET
+        game_status = 'FINISHED'
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+</mapper>

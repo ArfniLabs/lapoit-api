@@ -59,6 +59,15 @@
         DELETE FROM game WHERE game_id = #{gameId}
     </delete>
 
+    <!-- 게임 템플릿 존재 여부 확인 -->
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1
+        FROM game
+        WHERE game_id = #{gameId}
+        )
+    </select>
+
     <select id="findById" resultType="com.lapoit.api.domain.Game">
         SELECT * FROM game WHERE game_id = #{gameId}
     </select>

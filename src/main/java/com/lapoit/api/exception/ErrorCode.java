@@ -20,6 +20,9 @@ public enum ErrorCode {
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE-404", "해당 지점이 존재하지 않습니다."),
 
 
+    // 게임 관련
+    GAME_NOT_FOUND(HttpStatus.NOT_FOUND, "GAME-404", "해당 게임 템플릿이 존재하지 않습니다."),
+    GAME_ALREADY_START(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임이 이미 진행중입니다."),
 
     // 서버/기타
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER-500", "서버 내부 오류가 발생했습니다.");
