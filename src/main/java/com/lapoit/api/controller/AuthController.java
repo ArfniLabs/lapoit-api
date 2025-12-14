@@ -3,6 +3,7 @@ package com.lapoit.api.controller;
 
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.auth.LoginRequestDto;
+import com.lapoit.api.dto.auth.RefreshTokenRequestDto;
 import com.lapoit.api.dto.auth.SignupRequestDto;
 import com.lapoit.api.dto.auth.TokenResponseDto;
 import com.lapoit.api.service.AuthService;
@@ -58,6 +59,18 @@ public class AuthController {
                 ApiResponseDto.success("Auth-200", "로그인 성공", tokenResponse)
         );
     }
+
+    //Refresh API
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody RefreshTokenRequestDto request) {
+        TokenResponseDto tokenResponse = authService.refresh(request);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "로그인 성공", tokenResponse)
+        );
+    }
+    //이쪽은 인증 권한필요
+    //로그아웃 ( lastLogoutAt 방식이면  으로 액세스 토큰 관리하자)
 
 }
 

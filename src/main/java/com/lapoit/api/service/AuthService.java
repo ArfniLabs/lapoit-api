@@ -4,6 +4,7 @@ package com.lapoit.api.service;
 import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.domain.User;
 import com.lapoit.api.dto.auth.LoginRequestDto;
+import com.lapoit.api.dto.auth.RefreshTokenRequestDto;
 import com.lapoit.api.dto.auth.SignupRequestDto;
 import com.lapoit.api.dto.auth.TokenResponseDto;
 import com.lapoit.api.exception.CustomException;
@@ -12,17 +13,22 @@ import com.lapoit.api.jwt.JwtTokenProvider;
 import com.lapoit.api.mapper.TempUserMapper;
 import com.lapoit.api.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.concurrent.TimeUnit;
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthService {
 
+    private final StringRedisTemplate redisTemplate;
     private final UserMapper userMapper;
     private final TempUserMapper tempUserMapper;
     private final PasswordEncoder passwordEncoder;
@@ -86,7 +92,14 @@ public class AuthService {
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getUserId());
 
         long accessTokenValidity = jwtTokenProvider.getAccessTokenValidityInMillis();
+        long refreshTtlMillis = jwtTokenProvider.getRefreshTokenValidityInMillis();
 
+        redisTemplate.opsForValue().set(
+                user.getUserId(),
+                refreshToken,
+                refreshTtlMillis,
+                TimeUnit.MILLISECONDS
+        );
         // 5) Redis를 나중에 붙일 거면 여기에서 refreshToken 저장하면 됨
 
         return TokenResponseDto.of(accessToken, refreshToken, accessTokenValidity);
@@ -105,5 +118,36 @@ public class AuthService {
         TempUser existingTemp = tempUserMapper.findByNickname(userNickname);
 
         checkExistenceAndThrow(existing, existingTemp, ErrorCode.NICKNAME_ALREADY_EXISTS);
+    }
+
+    //토큰 재발급 과정
+    public TokenResponseDto refresh(RefreshTokenRequestDto request) {
+
+        if (!jwtTokenProvider.validateToken(request.getRefreshToken())) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+
+        String userId= jwtTokenProvider.getUserId(request.getRefreshToken());
+
+        User user=userMapper.findByUserId(userId);
+
+        String saved = redisTemplate.opsForValue().get(userId);
+        if (saved == null || !saved.equals(request.getRefreshToken())) {
+            // 탈취/중복로그인/만료 등
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        String newAccess = jwtTokenProvider.createAccessToken(user.getUserId(), user.getRole());
+
+        String newRefresh = jwtTokenProvider.createRefreshToken(userId);
+
+        long refreshTtlMillis = jwtTokenProvider.getRefreshTokenValidityInMillis();
+        redisTemplate.opsForValue().set( userId, newRefresh, refreshTtlMillis, TimeUnit.MILLISECONDS);
+
+        long accessTtl = jwtTokenProvider.getAccessTokenValidityInMillis();
+
+        return TokenResponseDto.of(newAccess, newRefresh, accessTtl);
+
+
     }
 }

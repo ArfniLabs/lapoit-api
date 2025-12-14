@@ -15,6 +15,8 @@ public enum ErrorCode {
     // 인증/인가
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH-401", "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH-403", "접근 권한이 없습니다."),
+    INVALID_TOKEN(HttpStatus.FORBIDDEN,"AUTH-407","유효하지 않은 토큰입니다." ),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,"AUTH-408" ,"유효하지 않은 리프레시 토큰입니다." ),
 
     // 매장 관련
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE-404", "해당 지점이 존재하지 않습니다."),
@@ -26,6 +28,7 @@ public enum ErrorCode {
 
     // 서버/기타
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER-500", "서버 내부 오류가 발생했습니다.");
+
 
     private final HttpStatus status;
     private final String code;
