@@ -6,6 +6,7 @@ import com.lapoit.api.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -28,6 +29,8 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final StringRedisTemplate redisTemplate;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,12 +49,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 로그인/회원가입, Swagger, 기타 공개 API
                         .requestMatchers(
-                                "/api/v1/auth/**",
+                                "/api/v1/auth/signup",
+                                "/api/v1/auth/check-id",
+                                "/api/v1/auth/check-nickname",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/refresh",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         // 그 외 /api/** 는 전부 인증 필요
+                        .requestMatchers("/api/v1/auth/logout").authenticated()
                         .requestMatchers("/api/v1/admin/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                         // 나머지는 일단 허용(필요하면 .authenticated() 로 바꿔도 됨)
@@ -63,7 +71,7 @@ public class SecurityConfig {
 
         //  JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 끼워 넣기
         http.addFilterBefore(
-                new JwtAuthenticationFilter(jwtTokenProvider),
+                new JwtAuthenticationFilter(jwtTokenProvider,redisTemplate),
                 UsernamePasswordAuthenticationFilter.class
         );
 
