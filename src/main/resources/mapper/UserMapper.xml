@@ -38,6 +38,14 @@
         WHERE id = #{id}
     </select>
 
+
+    <select id="findByUserNameAndPhoneNumber" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+        WHERE user_name = #{userName}
+        AND phone_number = #{phoneNumber}
+    </select>
+
     <insert id="save" parameterType="com.lapoit.api.domain.User"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user (

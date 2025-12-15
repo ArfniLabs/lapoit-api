@@ -3,10 +3,7 @@ package com.lapoit.api.service;
 
 import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.domain.User;
-import com.lapoit.api.dto.auth.LoginRequestDto;
-import com.lapoit.api.dto.auth.RefreshTokenRequestDto;
-import com.lapoit.api.dto.auth.SignupRequestDto;
-import com.lapoit.api.dto.auth.TokenResponseDto;
+import com.lapoit.api.dto.auth.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.jwt.JwtTokenProvider;
@@ -46,7 +43,7 @@ public class AuthService {
         // 1) 아이디 중복 체크
         User existing = userMapper.findByUserId(requestDto.getUserId());
         if (existing != null) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+            throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
         }
 
         // 2) 새 유저 생성 (임시 유저 테이블에 저장)
@@ -93,14 +90,13 @@ public class AuthService {
 
         long accessTokenValidity = jwtTokenProvider.getAccessTokenValidityInMillis();
         long refreshTtlMillis = jwtTokenProvider.getRefreshTokenValidityInMillis();
-
+        //레디스를 통해 저장
         redisTemplate.opsForValue().set(
                 user.getUserId(),
                 refreshToken,
                 refreshTtlMillis,
                 TimeUnit.MILLISECONDS
         );
-        // 5) Redis를 나중에 붙일 거면 여기에서 refreshToken 저장하면 됨
 
         return TokenResponseDto.of(accessToken, refreshToken, accessTokenValidity);
     }
@@ -157,6 +153,21 @@ public class AuthService {
         //lastLogoutAt
         long now = System.currentTimeMillis();
         redisTemplate.opsForValue().set("LO:" + userId, String.valueOf(now));
+
+    }
+
+    public FindIdResponseDto findId(FindIdRequestDto findIdRequestDto) {
+        User user = userMapper.findByUserNameAndPhoneNumber(findIdRequestDto.getUserName(), findIdRequestDto.getPhoneNumber());
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        FindIdResponseDto id= FindIdResponseDto.builder()
+                .userId(user.getUserId())
+                .build();
+        return id;
+
+
 
     }
 }

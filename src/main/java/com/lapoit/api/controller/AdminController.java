@@ -54,6 +54,9 @@ public class AdminController {
         );
     }
 
+    //비번찾기 (아이디와 사람이름 휴대폰 번호를 받아서 비번 찾기 가능)
+    
+
 
 
 
