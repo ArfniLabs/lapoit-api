@@ -3,6 +3,7 @@ package com.lapoit.api.service;
 import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.domain.User;
 import com.lapoit.api.dto.admin.TempUserResponseDto;
+import com.lapoit.api.dto.admin.UserListResponseDto;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.mapper.TempUserMapper;
@@ -69,5 +70,13 @@ public class AdminService {
     @Transactional
     public void rejectUser(String userId) {
         tempUserMapper.deleteByUserId(userId);
+    }
+
+    public List<UserListResponseDto> getUsers() {
+        List<User> users = userMapper.findAll();
+
+        return users.stream()
+                .map(UserListResponseDto::from)
+                .toList();
     }
 }

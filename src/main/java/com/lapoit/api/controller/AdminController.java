@@ -3,6 +3,7 @@ package com.lapoit.api.controller;
 import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.admin.TempUserResponseDto;
+import com.lapoit.api.dto.admin.UserListResponseDto;
 import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.jwt.JwtTokenProvider;
 import com.lapoit.api.service.AdminService;
@@ -55,6 +56,17 @@ public class AdminController {
     }
 
     //비번찾기 (아이디와 사람이름 휴대폰 번호를 받아서 비번 찾기 가능)
+
+    //전체회원조회
+    @GetMapping("/users")
+    public ResponseEntity<?> getUsers() {
+        List<UserListResponseDto> users = adminService.getUsers();
+
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "전체 회원 조회 성공", users)
+        );
+    }
 
 
 

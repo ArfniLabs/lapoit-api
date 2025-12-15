@@ -57,4 +57,9 @@
         )
     </insert>
 
+    <select id="findAll" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+    </select>
+
 </mapper>
