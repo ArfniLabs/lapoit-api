@@ -30,8 +30,8 @@ mybatis:
 
 jwt:
   secret: YmVzdHNlY3JldGtleWluYmFzZTY0ZW5jb2RlZGZvcnNoYTI1Ng==
-  access-token-validity: 3600000000
-  refresh-token-validity: 36000000000000
+  access-token-validity: 1800000
+  refresh-token-validity: 604800000
 
 logging:
   level:

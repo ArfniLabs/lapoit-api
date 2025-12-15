@@ -14,4 +14,8 @@ public interface  UserMapper {
 
     User findByNickname(@Param("userNickname") String userNickname);
 
+    User findByUserNameAndPhoneNumber(
+            @Param("userName") String userName,
+            @Param("phoneNumber") String phoneNumber
+    );
 }

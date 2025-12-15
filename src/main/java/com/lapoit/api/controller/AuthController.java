@@ -3,10 +3,7 @@ package com.lapoit.api.controller;
 
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.admin.TempUserResponseDto;
-import com.lapoit.api.dto.auth.LoginRequestDto;
-import com.lapoit.api.dto.auth.RefreshTokenRequestDto;
-import com.lapoit.api.dto.auth.SignupRequestDto;
-import com.lapoit.api.dto.auth.TokenResponseDto;
+import com.lapoit.api.dto.auth.*;
 import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.service.AuthService;
 import lombok.Getter;
@@ -86,5 +83,18 @@ public class AuthController {
                 ApiResponseDto.success("Auth-200", "로그아웃 성공", null)
         );
     }
+
+    //아이디 찾기
+    @PostMapping("/find-id")
+    public ResponseEntity<?> findId(@RequestBody FindIdRequestDto findIdRequestDto){
+        FindIdResponseDto id= authService.findId(findIdRequestDto);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "아이디 찾기 성공", id)
+        );
+
+    }
+
+
 }
 
