@@ -19,6 +19,11 @@ public interface GameBlindMapper {
             @Param("dto") GameBlindDto dto
     );
 
+    // ⭐ 특정 게임 + 특정 레벨 블라인드
+    GameBlind findByGameIdAndLevel(
+            @Param("gameId") Long gameId,
+            @Param("level") Integer level
+    );
 
     List<GameBlind> findByGameId(Long gameId);
 }

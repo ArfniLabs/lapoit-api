@@ -18,6 +18,8 @@ public interface GameMapper {
 
     Game findById(Long gameId);
 
+    boolean existsById(@Param("gameId") Long gameId);
+
     void patchGame(
             @Param("gameId") Long gameId,
             @Param("dto") GamePatchRequest dto
