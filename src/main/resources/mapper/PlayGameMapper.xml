@@ -46,11 +46,18 @@
         UPDATE play_game
         SET
         game_status = 'STARTED',
+
         total_stop_time =
         total_stop_time
         + TIMESTAMPDIFF(SECOND, stop_time, NOW()),
+
+        level_stop_time =
+        level_stop_time
+        + TIMESTAMPDIFF(SECOND, stop_time, NOW()),
+
         stop_time = NULL
         WHERE play_game_id = #{playGameId}
+
     </update>
 
 
@@ -95,7 +102,9 @@
         pg.rebuyin_count,
         pg.total_stack,
         pg.average_stack,
-        pg.total_stop_time
+        pg.total_stop_time,
+        pg.level_stop_time
+
         FROM play_game pg
         JOIN game g ON pg.game_id = g.game_id
         WHERE pg.store_id = #{storeId}
@@ -125,7 +134,9 @@
         pg.average_stack  AS averageStack,
 
         pg.game_status    AS gameStatus,
-        pg.total_stop_time AS totalStopTime
+        pg.total_stop_time AS totalStopTime,
+        pg.level_stop_time AS levelStopTime
+
 
         FROM play_game pg
         JOIN game g ON pg.game_id = g.game_id
@@ -139,9 +150,11 @@
         UPDATE play_game
         SET
         game_level = #{nextLevel},
-        level_start_at = NOW()
+        level_start_at = NOW(),
+        level_stop_time = 0
         WHERE play_game_id = #{playGameId}
     </update>
+
 
     <!-- ========================= -->
     <!-- 게임 종료 -->

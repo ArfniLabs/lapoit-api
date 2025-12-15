@@ -20,7 +20,6 @@ public class GameProgressCalculator {
             List<GameBlind> blinds
     ) {
 
-        // 1️⃣ 계산 불가 케이스
         if (!isCalculatable(game, blinds)) {
             return baseResponse(game);
         }
@@ -28,7 +27,11 @@ public class GameProgressCalculator {
         GameBlind currentBlind = findCurrentBlind(game, blinds);
         GameBlind nextBlind = findNextBlind(game, blinds);
 
-        long elapsedSeconds = calculateElapsedSeconds(game);
+        long elapsedSeconds =
+                Duration.between(game.getLevelStartAt(), LocalDateTime.now()).getSeconds()
+                        - game.getLevelStopTime();
+
+
         int levelDurationSeconds = currentBlind.getDuration() * 60;
 
         int remainingSeconds =
@@ -53,19 +56,6 @@ public class GameProgressCalculator {
     }
 
     /* =========================
-       경과 시간 계산 (⭐ 핵심)
-       ========================= */
-    private long calculateElapsedSeconds(PlayGameRow game) {
-        return Math.max(
-                Duration.between(
-                        game.getLevelStartAt(),
-                        LocalDateTime.now()
-                ).getSeconds(),
-                0
-        );
-    }
-
-    /* =========================
        블라인드 조회
        ========================= */
     private GameBlind findCurrentBlind(
@@ -77,8 +67,7 @@ public class GameProgressCalculator {
                 .findFirst()
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "현재 레벨 블라인드가 존재하지 않습니다. level="
-                                        + game.getGameLevel()
+                                "현재 레벨 블라인드 없음. level=" + game.getGameLevel()
                         )
                 );
     }
@@ -115,6 +104,7 @@ public class GameProgressCalculator {
                 .levelStartAt(game.getLevelStartAt())
                 .levelDurationMinutes(currentBlind.getDuration())
                 .levelRemainingSeconds(remainingSeconds)
+                .levelStopTime(game.getLevelStopTime())
 
                 .currentBlind(toBlind(currentBlind))
                 .nextBlind(nextBlind != null ? toBlind(nextBlind) : null)
@@ -136,9 +126,6 @@ public class GameProgressCalculator {
                 .build();
     }
 
-    /* =========================
-       기본 응답 (계산 불가)
-       ========================= */
     private PlayGameStoreViewResponse baseResponse(PlayGameRow game) {
         return PlayGameStoreViewResponse.builder()
                 .playGameId(game.getPlayGameId())
@@ -155,4 +142,3 @@ public class GameProgressCalculator {
                 .build();
     }
 }
-

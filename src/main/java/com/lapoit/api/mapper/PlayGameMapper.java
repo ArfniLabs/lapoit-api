@@ -37,7 +37,8 @@ public interface PlayGameMapper {
     /** 레벨 업 */
     void levelUp(
             @Param("playGameId") Long playGameId,
-            @Param("nextLevel") int nextLevel
+            @Param("currentLevel") Integer currentLevel,
+            @Param("nextLevel") Integer nextLevel
     );
 
     /** 게임 종료 */

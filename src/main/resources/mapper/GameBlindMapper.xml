@@ -19,6 +19,19 @@
         ORDER BY level ASC
     </select>
 
+    <select id="findByGameIdAndLevel"
+            resultType="com.lapoit.api.domain.GameBlind">
+        SELECT
+        level,
+        small_blind,
+        big_blind,
+        ante,
+        duration
+        FROM game_blind
+        WHERE game_id = #{gameId}
+        AND level = #{level}
+    </select>
+
     <update id="patchGameBlind">
         UPDATE game_blind
         <set>

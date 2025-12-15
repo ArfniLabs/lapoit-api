@@ -31,4 +31,5 @@ public class PlayGameRow {
     private Integer averageStack;
 
     private Integer totalStopTime; // 초 단위
+    private Integer levelStopTime;
 }
