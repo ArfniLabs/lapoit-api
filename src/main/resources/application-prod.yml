@@ -1,24 +1,34 @@
-#server:
-#  port: ${SPRING_BACKEND_PORT}
-#
-#spring:
-#
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: ${SPRING_DATASOURCE_URL}
-#    username: ${SPRING_DATASOURCE_USERNAME}
-#    password: ${SPRING_DATASOURCE_PASSWORD}
-#
-#  datasource.hikari:
-#    maximum-pool-size: 20
-#    minimum-idle: 5
-#    idle-timeout: 30000
-#    max-lifetime: 1800000
-#    connection-timeout: 10000
-#
-#mybatis:
-#  mapper-locations: classpath:mapper/**/*.xml
-#  type-aliases-package: com.lapoit.domain
-#  configuration:
-#    map-underscore-to-camel-case: true
-#    cache-enabled: false
+server:
+  port: ${SPRING_BACKEND_PORT}
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL_PROD}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  datasource.hikari:
+    maximum-pool-size: 20
+    minimum-idle: 5
+    idle-timeout: 30000
+    max-lifetime: 1800000
+    connection-timeout: 10000
+
+  data:
+    redis:
+      host: ${API_BASE_URL}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.lapoit.domain
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+
+jwt:
+  secret: YmVzdHNlY3JldGtleWluYmFzZTY0ZW5jb2RlZGZvcnNoYTI1Ng==
+  access-token-validity: 1800000
+  refresh-token-validity: 604800000

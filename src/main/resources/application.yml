@@ -1,17 +1,17 @@
 spring:
   profiles:
-    active: dev   # 기본 실행 프로필
+    active: prod   # 기본 실행 프로필
+
+#---
+#spring:
+#  config:
+#    activate:
+#      on-profile: dev
+#  config.import: application-dev.yml
 
 ---
 spring:
   config:
     activate:
-      on-profile: dev
-  config.import: application-dev.yml
-
----
-#spring:
-#  config:
-#    activate:
-#      on-profile: prod
-#  config.import: application-prod.yml
+      on-profile: prod
+  config.import: application-prod.yml
