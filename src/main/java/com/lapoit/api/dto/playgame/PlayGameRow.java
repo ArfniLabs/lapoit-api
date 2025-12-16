@@ -28,7 +28,6 @@ public class PlayGameRow {
     private Integer rebuyinCount;
 
     private Integer totalStack;
-    private Integer averageStack;
 
     private Integer totalStopTime; // 초 단위
     private Integer levelStopTime;

@@ -24,7 +24,15 @@ public enum ErrorCode {
 
     // 게임 관련
     GAME_NOT_FOUND(HttpStatus.NOT_FOUND, "GAME-404", "해당 게임 템플릿이 존재하지 않습니다."),
+    GAME_NOT_STARTED(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임이 아직 시작하지 않았습니다."),
     GAME_ALREADY_START(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임이 이미 진행중입니다."),
+    GAME_ALREADY_PAUSE(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임이 이미 정지중입니다."),
+    GAME_ALREADY_RESUME(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임이 이미 재시작중입니다."),
+    GAME_ALREADY_FINISHED(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임이 이미 종료되었습니다."),
+    GAME_ALREADY_JOINED(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임에 이미 참가한 유저입니다."),
+    USER_NOT_IN_GAME(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임에 참가하지 않은 유저입니다."),
+    USER_ALREADY_OUT(HttpStatus.BAD_REQUEST, "GAME-400", "이미 게임에서 아웃된 유저입니다."),
+
 
     // 서버/기타
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER-500", "서버 내부 오류가 발생했습니다.");

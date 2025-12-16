@@ -44,5 +44,16 @@ public interface PlayGameMapper {
     /** 게임 종료 */
     void finishGame(@Param("playGameId") Long playGameId);
 
+    /** 참가자 수 증가 */
+    void increaseTotalPeople(@Param("playGameId") Long playGameId);
+
+    void decreaseNowPeople(@Param("playGameId") Long playGameId);
+
+
+    void addStackOnJoin(
+            @Param("playGameId") Long playGameId,
+            @Param("stack") int stack
+    );
+
 }
 

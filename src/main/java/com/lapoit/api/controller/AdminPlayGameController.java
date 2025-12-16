@@ -1,6 +1,7 @@
 package com.lapoit.api.controller;
 
 import com.lapoit.api.dto.ApiResponseDto;
+import com.lapoit.api.dto.playgame.AdminJoinGameRequest;
 import com.lapoit.api.dto.playgame.AdminPlayGameCreateRequest;
 import com.lapoit.api.dto.playgame.AdminPlayGameResponse;
 import com.lapoit.api.dto.playgame.PlayGameResponse;
@@ -64,6 +65,55 @@ public class AdminPlayGameController {
         );
     }
 
+    /** 게임 종료 */
+    @PatchMapping("/{playGameId}/finish")
+    public ResponseEntity<ApiResponseDto<?>> finishPlayGame(
+            @PathVariable("playGameId") Long playGameId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "GAME-205",
+                        "게임 종료",
+                        adminPlayGameService.finishPlayGame(playGameId)
+                )
+        );
+    }
+
+    /** 게임 탈락 처리 */
+    @PatchMapping("/{playGameId}/out/{userId}")
+    public ResponseEntity<ApiResponseDto<?>> outPlayer(
+            @PathVariable("playGameId") Long playGameId,
+            @PathVariable("userId") Long userId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "GAME-206",
+                        "플레이어 탈락 처리",
+                        adminPlayGameService.outPlayer(playGameId, userId)
+                )
+        );
+    }
+
+
+
+
+    /** 유저 게임 참가 */
+    @PostMapping("/{playGameId}/join")
+    public ResponseEntity<ApiResponseDto<?>> joinUser(
+            @PathVariable("playGameId") Long playGameId,
+            @RequestBody AdminJoinGameRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "GAME-201",
+                        "유저가 게임에 참가했습니다.",
+                        adminPlayGameService.joinUser(
+                                playGameId,
+                                request.getUserId()
+                        )
+                )
+        );
+    }
 
 
 }

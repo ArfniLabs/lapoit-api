@@ -10,8 +10,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-
 @Component
 public class GameProgressCalculator {
 
@@ -20,8 +18,10 @@ public class GameProgressCalculator {
             List<GameBlind> blinds
     ) {
 
+        int averageStack = calculateAverageStack(game);
+
         if (!isCalculatable(game, blinds)) {
-            return baseResponse(game);
+            return baseResponse(game, averageStack);
         }
 
         GameBlind currentBlind = findCurrentBlind(game, blinds);
@@ -30,7 +30,6 @@ public class GameProgressCalculator {
         long elapsedSeconds =
                 Duration.between(game.getLevelStartAt(), LocalDateTime.now()).getSeconds()
                         - game.getLevelStopTime();
-
 
         int levelDurationSeconds = currentBlind.getDuration() * 60;
 
@@ -41,13 +40,24 @@ public class GameProgressCalculator {
                 game,
                 currentBlind,
                 nextBlind,
-                remainingSeconds
+                remainingSeconds,
+                averageStack
         );
     }
 
     /* =========================
-       계산 가능 여부
+       평균 스택 계산 (⭐ 핵심)
        ========================= */
+    private int calculateAverageStack(PlayGameRow game) {
+        if (game.getNowPeople() == null || game.getNowPeople() <= 0) {
+            return 0;
+        }
+        if (game.getTotalStack() == null) {
+            return 0;
+        }
+        return game.getTotalStack() / game.getNowPeople();
+    }
+
     private boolean isCalculatable(PlayGameRow game, List<GameBlind> blinds) {
         return "STARTED".equals(game.getGameStatus())
                 && game.getLevelStartAt() != null
@@ -55,9 +65,6 @@ public class GameProgressCalculator {
                 && !blinds.isEmpty();
     }
 
-    /* =========================
-       블라인드 조회
-       ========================= */
     private GameBlind findCurrentBlind(
             PlayGameRow game,
             List<GameBlind> blinds
@@ -82,14 +89,12 @@ public class GameProgressCalculator {
                 .orElse(null);
     }
 
-    /* =========================
-       응답 생성
-       ========================= */
     private PlayGameStoreViewResponse buildResponse(
             PlayGameRow game,
             GameBlind currentBlind,
             GameBlind nextBlind,
-            int remainingSeconds
+            int remainingSeconds,
+            int averageStack
     ) {
 
         return PlayGameStoreViewResponse.builder()
@@ -102,9 +107,10 @@ public class GameProgressCalculator {
                 .startAt(game.getStartAt())
                 .currentLevel(game.getGameLevel())
                 .levelStartAt(game.getLevelStartAt())
+                .levelStopTime(game.getLevelStopTime())
+
                 .levelDurationMinutes(currentBlind.getDuration())
                 .levelRemainingSeconds(remainingSeconds)
-                .levelStopTime(game.getLevelStopTime())
 
                 .currentBlind(toBlind(currentBlind))
                 .nextBlind(nextBlind != null ? toBlind(nextBlind) : null)
@@ -113,7 +119,7 @@ public class GameProgressCalculator {
                 .nowPeople(game.getNowPeople())
                 .rebuyinCount(game.getRebuyinCount())
                 .totalStack(game.getTotalStack())
-                .averageStack(game.getAverageStack())
+                .averageStack(averageStack)
                 .build();
     }
 
@@ -126,7 +132,10 @@ public class GameProgressCalculator {
                 .build();
     }
 
-    private PlayGameStoreViewResponse baseResponse(PlayGameRow game) {
+    private PlayGameStoreViewResponse baseResponse(
+            PlayGameRow game,
+            int averageStack
+    ) {
         return PlayGameStoreViewResponse.builder()
                 .playGameId(game.getPlayGameId())
                 .storeId(game.getStoreId())
@@ -138,7 +147,7 @@ public class GameProgressCalculator {
                 .nowPeople(game.getNowPeople())
                 .rebuyinCount(game.getRebuyinCount())
                 .totalStack(game.getTotalStack())
-                .averageStack(game.getAverageStack())
+                .averageStack(averageStack)
                 .build();
     }
 }
