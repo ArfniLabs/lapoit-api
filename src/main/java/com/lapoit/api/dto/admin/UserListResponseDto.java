@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,6 +24,7 @@ public class UserListResponseDto {
     private String code;
     private String createAt;
     private String updateAt;
+    private Long point;
 
     public static UserListResponseDto from(User user) {
         return new UserListResponseDto(
@@ -34,7 +37,8 @@ public class UserListResponseDto {
                 user.getStatus(),
                 user.getCode(),
                 user.getCreateAt().toString(),
-                user.getUpdateAt().toString()
+                user.getUpdateAt().toString(),
+                user.getPoint()
         );
     }
 }

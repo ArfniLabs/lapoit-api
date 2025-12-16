@@ -68,7 +68,47 @@ public class AdminController {
         );
     }
 
+    //이름 기반 조회
+    @GetMapping("/users/find/name/{userName}")
+    public ResponseEntity<?> findUserByName(@PathVariable String userName) {
+        List<UserListResponseDto> users = adminService.findUserByName(userName);
 
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "이름 기반으로 회원 조회 성공", users)
+        );
+    }
+
+    //지역 기반 조회
+    @GetMapping("/users/find/store/{storeId}")
+    public ResponseEntity<?> findUserByStoreId(@PathVariable String storeId) {
+        List<UserListResponseDto> users = adminService.findUserByStoreId(storeId);
+
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "지역 기반으로 회원 조회 성공", users)
+        );
+    }
+
+    @GetMapping("/users/find/number/{phoneNumber}")
+    public ResponseEntity<?> findUserByPhoneNumber(@PathVariable String phoneNumber) {
+        List<UserListResponseDto> users = adminService.findUserByPhoneNumber(phoneNumber);
+
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "휴대폰 번호로 회원 조회 성공", users)
+        );
+    }
+
+    @GetMapping("/users/find/nickname/{userNickname}")
+    public ResponseEntity<?> findUserByNickname(@PathVariable String userNickname) {
+        List<UserListResponseDto> users = adminService.findUserByNickname(userNickname);
+
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "닉네임기반 회원 조회 성공", users)
+        );
+    }
 
 
 

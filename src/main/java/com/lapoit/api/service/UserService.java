@@ -23,6 +23,7 @@ public class UserService {
                 .phoneNumber(user.getPhoneNumber())
                 .userNickname(user.getUserNickname())
                 .userName(user.getUserName())
+                .point(user.getPoint())
                 .build();
 
 

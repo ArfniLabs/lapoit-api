@@ -22,4 +22,12 @@ public interface  UserMapper {
     );
 
     List<User> findAll();
+
+    List<User> findByUserName(@Param("userName") String userName);
+
+    List<User> findUserByStoreId(@Param("storeId") String storeId);
+
+    List<User> findUserByPhoneNumber(@Param("phoneNumber") String phoneNumber);
+
+    List<User> findUserByNickname(@Param("userNickname") String userNickname);
 }

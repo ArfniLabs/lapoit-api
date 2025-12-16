@@ -18,6 +18,7 @@
         <result property="status" column="status"/>
         <result property="createAt" column="create_at"/>
         <result property="updateAt" column="update_at"/>
+        <result property="point" column="point"/>
     </resultMap>
 
     <select id="findByUserId" parameterType="string" resultMap="UserResultMap">
@@ -50,16 +51,41 @@
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user (
         user_id, user_pw, user_name, store_id, phone_number,
-        user_nickname, role, code, status, create_at, update_at
+        user_nickname, role, code, status, create_at, update_at, point
         ) VALUES (
         #{userId}, #{userPw}, #{userName}, #{storeId}, #{phoneNumber},
-        #{userNickname}, #{role}, #{code}, #{status}, NOW(), NOW()
+        #{userNickname}, #{role}, #{code}, #{status}, NOW(), NOW() ,#{point}
         )
     </insert>
 
     <select id="findAll" resultMap="UserResultMap">
         SELECT *
         FROM user
+    </select>
+
+    <select id="findByUserName" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+        WHERE user_name = #{userName}
+    </select>
+
+    <select id="findUserByStoreId" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+        WHERE store_id = #{storeId}
+    </select>
+
+    <select id="findUserByPhoneNumber" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+        WHERE phone_number = #{phoneNumber}
+    </select>
+
+
+    <select id="findUserByNickname" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+        WHERE user_nickname = #{userNickname}
     </select>
 
 </mapper>

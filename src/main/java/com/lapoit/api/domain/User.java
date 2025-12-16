@@ -3,6 +3,8 @@ package com.lapoit.api.domain;
 
 import lombok.*;
 
+import java.math.BigInteger;
+
 @Getter
 @Setter
 @Builder
@@ -21,6 +23,7 @@ public class User {
     private String status;       // ACTIVE / INACTIVE
     private String createAt;
     private String updateAt;
+    private Long point;
 
 
 }
