@@ -1,7 +1,7 @@
 package com.lapoit.api.controller;
 
+import com.lapoit.api.controller.docs.UserControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
-import com.lapoit.api.dto.admin.TempUserResponseDto;
 import com.lapoit.api.dto.user.UserResponseDto;
 import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.service.UserService;
@@ -12,12 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
-public class UserController {
+public class UserController implements UserControllerDocs {
 
     private final UserService userService;
 

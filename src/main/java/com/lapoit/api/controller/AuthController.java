@@ -1,25 +1,27 @@
 package com.lapoit.api.controller;
 
 
+import com.lapoit.api.controller.docs.AuthControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
-import com.lapoit.api.dto.admin.TempUserResponseDto;
 import com.lapoit.api.dto.auth.*;
 import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.service.AuthService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 // 로그인 / 회원가입/ 재발급 / 로그아웃
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthControllerDocs {
 
     private final AuthService authService;
 

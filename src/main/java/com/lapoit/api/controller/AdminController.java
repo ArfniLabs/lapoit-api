@@ -1,6 +1,6 @@
 package com.lapoit.api.controller;
 
-import com.lapoit.api.domain.TempUser;
+import com.lapoit.api.controller.docs.AdminControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.admin.TempUserResponseDto;
 import com.lapoit.api.dto.admin.UserListResponseDto;
@@ -9,16 +9,20 @@ import com.lapoit.api.jwt.JwtTokenProvider;
 import com.lapoit.api.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
-public class AdminController {
+public class AdminController implements AdminControllerDocs {
     private final AdminService adminService;
     private final JwtTokenProvider jwtTokenProvider;
 
