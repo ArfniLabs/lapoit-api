@@ -1,23 +1,27 @@
 package com.lapoit.api.controller;
 
 
+import com.lapoit.api.controller.docs.AuthControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
-import com.lapoit.api.dto.auth.LoginRequestDto;
-import com.lapoit.api.dto.auth.RefreshTokenRequestDto;
-import com.lapoit.api.dto.auth.SignupRequestDto;
-import com.lapoit.api.dto.auth.TokenResponseDto;
+import com.lapoit.api.dto.auth.*;
+import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.service.AuthService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 // 로그인 / 회원가입/ 재발급 / 로그아웃
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthControllerDocs {
 
     private final AuthService authService;
 
@@ -71,6 +75,28 @@ public class AuthController {
     }
     //이쪽은 인증 권한필요
     //로그아웃 ( lastLogoutAt 방식이면  으로 액세스 토큰 관리하자)
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails principal) {
+        String userId=principal.getUsername();
+        authService.logout(userId);
+
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "로그아웃 성공", null)
+        );
+    }
+
+    //아이디 찾기
+    @PostMapping("/find-id")
+    public ResponseEntity<?> findId(@RequestBody FindIdRequestDto findIdRequestDto){
+        FindIdResponseDto id= authService.findId(findIdRequestDto);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "아이디 찾기 성공", id)
+        );
+
+    }
+
 
 }
 

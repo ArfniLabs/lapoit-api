@@ -4,6 +4,8 @@ import com.lapoit.api.domain.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface  UserMapper {
     User findByUserId(@Param("userId") String userId);
@@ -14,4 +16,18 @@ public interface  UserMapper {
 
     User findByNickname(@Param("userNickname") String userNickname);
 
+    User findByUserNameAndPhoneNumber(
+            @Param("userName") String userName,
+            @Param("phoneNumber") String phoneNumber
+    );
+
+    List<User> findAll();
+
+    List<User> findByUserName(@Param("userName") String userName);
+
+    List<User> findUserByStoreId(@Param("storeId") String storeId);
+
+    List<User> findUserByPhoneNumber(@Param("phoneNumber") String phoneNumber);
+
+    List<User> findUserByNickname(@Param("userNickname") String userNickname);
 }

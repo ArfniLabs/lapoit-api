@@ -3,10 +3,7 @@ package com.lapoit.api.service;
 
 import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.domain.User;
-import com.lapoit.api.dto.auth.LoginRequestDto;
-import com.lapoit.api.dto.auth.RefreshTokenRequestDto;
-import com.lapoit.api.dto.auth.SignupRequestDto;
-import com.lapoit.api.dto.auth.TokenResponseDto;
+import com.lapoit.api.dto.auth.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.jwt.JwtTokenProvider;
@@ -46,8 +43,10 @@ public class AuthService {
         // 1) 아이디 중복 체크
         User existing = userMapper.findByUserId(requestDto.getUserId());
         if (existing != null) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+            throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
         }
+        TempUser existingTemp = tempUserMapper.findByUserId(requestDto.getUserId());
+        if (existingTemp != null) throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
 
         // 2) 새 유저 생성 (임시 유저 테이블에 저장)
         TempUser user = TempUser.builder()
@@ -93,14 +92,14 @@ public class AuthService {
 
         long accessTokenValidity = jwtTokenProvider.getAccessTokenValidityInMillis();
         long refreshTtlMillis = jwtTokenProvider.getRefreshTokenValidityInMillis();
-
+        String key = "RT:" + user.getUserId();
+        //레디스를 통해 저장
         redisTemplate.opsForValue().set(
-                user.getUserId(),
+                key,
                 refreshToken,
                 refreshTtlMillis,
                 TimeUnit.MILLISECONDS
         );
-        // 5) Redis를 나중에 붙일 거면 여기에서 refreshToken 저장하면 됨
 
         return TokenResponseDto.of(accessToken, refreshToken, accessTokenValidity);
     }
@@ -130,8 +129,12 @@ public class AuthService {
         String userId= jwtTokenProvider.getUserId(request.getRefreshToken());
 
         User user=userMapper.findByUserId(userId);
+        if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
 
-        String saved = redisTemplate.opsForValue().get(userId);
+        if (!"ACTIVE".equals(user.getStatus())) {
+            throw new CustomException(ErrorCode.ACCOUNT_DISABLED);
+        }String key = "RT:" + userId;
+        String saved = redisTemplate.opsForValue().get(key);
         if (saved == null || !saved.equals(request.getRefreshToken())) {
             // 탈취/중복로그인/만료 등
             throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
@@ -142,11 +145,36 @@ public class AuthService {
         String newRefresh = jwtTokenProvider.createRefreshToken(userId);
 
         long refreshTtlMillis = jwtTokenProvider.getRefreshTokenValidityInMillis();
-        redisTemplate.opsForValue().set( userId, newRefresh, refreshTtlMillis, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set( "RT:" + userId, newRefresh, refreshTtlMillis, TimeUnit.MILLISECONDS);
 
         long accessTtl = jwtTokenProvider.getAccessTokenValidityInMillis();
 
         return TokenResponseDto.of(newAccess, newRefresh, accessTtl);
+
+
+    }
+
+    public void logout(String userId) {
+        //refresh  제거
+        redisTemplate.delete(userId);
+        //lastLogoutAt
+        long now = System.currentTimeMillis();
+        long accessTtl = jwtTokenProvider.getAccessTokenValidityInMillis();
+        redisTemplate.opsForValue().set("LO:" + userId, String.valueOf(now), accessTtl, TimeUnit.MILLISECONDS);
+
+    }
+
+    public FindIdResponseDto findId(FindIdRequestDto findIdRequestDto) {
+        User user = userMapper.findByUserNameAndPhoneNumber(findIdRequestDto.getUserName(), findIdRequestDto.getPhoneNumber());
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        FindIdResponseDto id= FindIdResponseDto.builder()
+                .userId(user.getUserId())
+                .build();
+        return id;
+
 
 
     }

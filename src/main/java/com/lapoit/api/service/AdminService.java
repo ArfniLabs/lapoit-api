@@ -3,6 +3,7 @@ package com.lapoit.api.service;
 import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.domain.User;
 import com.lapoit.api.dto.admin.TempUserResponseDto;
+import com.lapoit.api.dto.admin.UserListResponseDto;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.mapper.TempUserMapper;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.List;
 
 
@@ -57,6 +59,7 @@ public class AdminService {
                 .role(temp.getRole())          // 보통 USER
                 .code(temp.getCode())
                 .status("ACTIVE")
+                .point(0L)
                 .build();
 
         userMapper.save(user);
@@ -69,5 +72,45 @@ public class AdminService {
     @Transactional
     public void rejectUser(String userId) {
         tempUserMapper.deleteByUserId(userId);
+    }
+
+    public List<UserListResponseDto> getUsers() {
+        List<User> users = userMapper.findAll();
+
+        return users.stream()
+                .map(UserListResponseDto::from)
+                .toList();
+    }
+
+    public List<UserListResponseDto> findUserByName(String userName) {
+        List<User> users = userMapper.findByUserName(userName);
+
+        return users.stream()
+                .map(UserListResponseDto::from)
+                .toList();
+    }
+
+    public List<UserListResponseDto> findUserByStoreId(String storeId) {
+        List<User> users = userMapper.findUserByStoreId(storeId);
+
+        return users.stream()
+                .map(UserListResponseDto::from)
+                .toList();
+    }
+
+    public List<UserListResponseDto> findUserByPhoneNumber(String phoneNumber) {
+        List<User> users = userMapper.findUserByPhoneNumber(phoneNumber);
+
+        return users.stream()
+                .map(UserListResponseDto::from)
+                .toList();
+    }
+
+    public List<UserListResponseDto> findUserByNickname(String userNickname) {
+        List<User> users = userMapper.findUserByNickname(userNickname);
+
+        return users.stream()
+                .map(UserListResponseDto::from)
+                .toList();
     }
 }
