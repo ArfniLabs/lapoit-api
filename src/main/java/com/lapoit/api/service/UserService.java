@@ -11,6 +11,7 @@ import com.lapoit.api.mapper.UserScoreMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.List;
 public class UserService {
     private final UserMapper userMapper;
     private final UserScoreMapper userScoreMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponseDto getMyInfo(String userId) {
         User user= userMapper.findByUserId(userId);
@@ -77,6 +79,26 @@ public class UserService {
         List<UserScore> scores=userScoreMapper.findByUserId(userInfo.getId());
 
         return scores;
+    }
+
+    public boolean checkPassword(String userId, String password) {
+        User user = userMapper.findByUserId(userId);
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+        return passwordEncoder.matches(password, user.getUserPw());
+    }
+
+    @Transactional
+    public void changePassword(String userId, String currentPassword, String newPassword) {
+        User user = userMapper.findByUserId(userId);
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+        if (!passwordEncoder.matches(currentPassword, user.getUserPw())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+        userMapper.updatePassword(user.getId(), passwordEncoder.encode(newPassword));
     }
 }
 

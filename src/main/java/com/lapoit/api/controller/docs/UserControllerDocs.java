@@ -1,5 +1,7 @@
 package com.lapoit.api.controller.docs;
 
+import com.lapoit.api.dto.user.PasswordCheckRequestDto;
+import com.lapoit.api.dto.user.UpdatePasswordRequestDto;
 import com.lapoit.api.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,4 +24,27 @@ public interface UserControllerDocs {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     ResponseEntity<?> getMyInfo(@Parameter(hidden = true) CustomUserDetails principal);
+
+    @Operation(
+            summary = "Check password",
+            description = "Compare the provided password with the authenticated user's current password.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password match result returned"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    ResponseEntity<?> checkPassword(@Parameter(hidden = true) CustomUserDetails principal, PasswordCheckRequestDto dto);
+
+    @Operation(
+        summary = "Change password",
+        description = "Update the authenticated user's password after verifying the current password.",
+        security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password updated"),
+            @ApiResponse(responseCode = "400", description = "Current password mismatch"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    ResponseEntity<?> changePassword(@Parameter(hidden = true) CustomUserDetails principal, UpdatePasswordRequestDto dto);
 }
