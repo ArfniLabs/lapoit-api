@@ -88,4 +88,11 @@
         WHERE user_nickname = #{userNickname}
     </select>
 
+    <update id="updatePassword">
+        UPDATE user
+        SET user_pw = #{encode},
+        update_at = NOW()
+        WHERE id = #{id}
+    </update>
+
 </mapper>

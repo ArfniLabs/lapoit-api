@@ -2,6 +2,7 @@ package com.lapoit.api.service;
 
 import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.domain.User;
+import com.lapoit.api.dto.admin.ResetPasswordRequestDto;
 import com.lapoit.api.dto.admin.TempUserResponseDto;
 import com.lapoit.api.dto.admin.UserListResponseDto;
 import com.lapoit.api.exception.CustomException;
@@ -9,6 +10,7 @@ import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.mapper.TempUserMapper;
 import com.lapoit.api.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +24,7 @@ public class AdminService {
 
     private final UserMapper userMapper;
     private final TempUserMapper tempUserMapper;
-
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public List<TempUserResponseDto> getPendingUsers(String userId) {
@@ -112,5 +114,27 @@ public class AdminService {
         return users.stream()
                 .map(UserListResponseDto::from)
                 .toList();
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDto dto) {
+        User user = userMapper.findByUserId(dto.getUserId());
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+        if (!user.getUserName().equals(dto.getUserName())) {
+            throw new CustomException(ErrorCode.USER_INFO_MISMATCH_NAME);
+        }
+
+        if(!user.getPhoneNumber().equals(dto.getPhoneNumber())){
+            throw new CustomException(ErrorCode.USER_INFO_MISMATCH_NUMBER);
+
+        }
+        String tempPassword = "123456";
+        userMapper.updatePassword(user.getId(), passwordEncoder.encode(tempPassword));
+
+
+
+
     }
 }

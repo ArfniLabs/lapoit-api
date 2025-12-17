@@ -30,4 +30,6 @@ public interface  UserMapper {
     List<User> findUserByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 
     List<User> findUserByNickname(@Param("userNickname") String userNickname);
+
+    void updatePassword(@Param("id") Long id, @Param("encode") String encode);
 }

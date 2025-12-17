@@ -2,6 +2,7 @@ package com.lapoit.api.controller;
 
 import com.lapoit.api.controller.docs.AdminControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
+import com.lapoit.api.dto.admin.ResetPasswordRequestDto;
 import com.lapoit.api.dto.admin.TempUserResponseDto;
 import com.lapoit.api.dto.admin.UserListResponseDto;
 import com.lapoit.api.jwt.CustomUserDetails;
@@ -10,12 +11,7 @@ import com.lapoit.api.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,7 +23,7 @@ public class AdminController implements AdminControllerDocs {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-    //승인대기 목록 조회
+    //승인대기 목록 조회 (자기 지역 부분만 승인 가능하도록 되어있음)
     @GetMapping("/users/pending")
     public ResponseEntity<?> getPendingUsers(@AuthenticationPrincipal CustomUserDetails principal) {
         String userId=principal.getUsername();
@@ -113,6 +109,17 @@ public class AdminController implements AdminControllerDocs {
                 ApiResponseDto.success("Admin-200", "닉네임기반 회원 조회 성공", users)
         );
     }
+
+    //비번 초기화(이름 /아이디/ 휴대폰 번호 )
+    @PatchMapping("/users/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDto dto){
+
+        adminService.resetPassword(dto);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "비번초기화 성공", null)
+        );
+    }
+
 
 
 
