@@ -5,6 +5,7 @@ import com.lapoit.api.domain.UserScore;
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.user.CreateStoreRequestDto;
 import com.lapoit.api.dto.user.PasswordCheckRequestDto;
+import com.lapoit.api.dto.user.UpdateProfileRequestDto;
 import com.lapoit.api.dto.user.UpdatePasswordRequestDto;
 import com.lapoit.api.dto.user.UserResponseDto;
 import com.lapoit.api.jwt.CustomUserDetails;
@@ -83,6 +84,17 @@ public class UserController implements UserControllerDocs {
 
         return ResponseEntity.ok(
                 ApiResponseDto.success("USER-200", "비밀번호 변경 완료", null)
+        );
+    }
+
+    //개인정보 수정 (닉네임,휴대폰 번호, 상점아이디)
+    @PatchMapping("/profile")
+    public ResponseEntity<?> updateProfile(@AuthenticationPrincipal CustomUserDetails principal, @RequestBody UpdateProfileRequestDto dto) {
+        String userId = principal.getUsername();
+        userService.updateProfile(userId, dto);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("USER-200", "개인정보 수정 완료", null)
         );
     }
 

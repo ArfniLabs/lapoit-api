@@ -2,6 +2,7 @@ package com.lapoit.api.controller.docs;
 
 import com.lapoit.api.dto.user.PasswordCheckRequestDto;
 import com.lapoit.api.dto.user.UpdatePasswordRequestDto;
+import com.lapoit.api.dto.user.UpdateProfileRequestDto;
 import com.lapoit.api.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,4 +48,16 @@ public interface UserControllerDocs {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     ResponseEntity<?> changePassword(@Parameter(hidden = true) CustomUserDetails principal, UpdatePasswordRequestDto dto);
+
+    @Operation(
+            summary = "Update profile",
+            description = "Update nickname and store ID for the authenticated user.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Profile updated"),
+            @ApiResponse(responseCode = "409", description = "Nickname or phone number already exists"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    ResponseEntity<?> updateProfile(@Parameter(hidden = true) CustomUserDetails principal, UpdateProfileRequestDto dto);
 }

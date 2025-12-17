@@ -32,4 +32,10 @@ public interface  UserMapper {
     List<User> findUserByNickname(@Param("userNickname") String userNickname);
 
     void updatePassword(@Param("id") Long id, @Param("encode") String encode);
+
+    void updateProfile(
+            @Param("id") Long id,
+            @Param("userNickname") String userNickname,
+            @Param("storeId") Integer storeId
+    );
 }

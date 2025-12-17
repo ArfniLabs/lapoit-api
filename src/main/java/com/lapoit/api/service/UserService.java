@@ -3,9 +3,11 @@ package com.lapoit.api.service;
 import com.lapoit.api.domain.User;
 import com.lapoit.api.domain.UserScore;
 import com.lapoit.api.dto.user.CreateStoreRequestDto;
+import com.lapoit.api.dto.user.UpdateProfileRequestDto;
 import com.lapoit.api.dto.user.UserResponseDto;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
+import com.lapoit.api.mapper.TempUserMapper;
 import com.lapoit.api.mapper.UserMapper;
 import com.lapoit.api.mapper.UserScoreMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.List;
 public class UserService {
     private final UserMapper userMapper;
     private final UserScoreMapper userScoreMapper;
+    private final TempUserMapper tempUserMapper;
     private final PasswordEncoder passwordEncoder;
 
     public UserResponseDto getMyInfo(String userId) {
@@ -99,6 +102,29 @@ public class UserService {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
         userMapper.updatePassword(user.getId(), passwordEncoder.encode(newPassword));
+    }
+
+    @Transactional
+    public void updateProfile(String userId, UpdateProfileRequestDto dto) {
+        User user = userMapper.findByUserId(userId);
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        String newNickname = dto.getUserNickname();
+        Integer newStoreId = dto.getStoreId();
+
+        if (newNickname != null && !newNickname.equals(user.getUserNickname())) {
+            User existingUserNick = userMapper.findByNickname(newNickname);
+            if (existingUserNick != null && !existingUserNick.getId().equals(user.getId())) {
+                throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+            }
+            if (tempUserMapper.findByNickname(newNickname) != null) {
+                throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+            }
+        }
+
+        userMapper.updateProfile(user.getId(), newNickname, newStoreId);
     }
 }
 

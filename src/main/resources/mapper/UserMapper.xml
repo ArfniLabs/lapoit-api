@@ -95,4 +95,13 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateProfile">
+        UPDATE user
+        SET
+            user_nickname = #{userNickname},
+            store_id = #{storeId},
+            update_at = NOW()
+        WHERE id = #{id}
+    </update>
+
 </mapper>
