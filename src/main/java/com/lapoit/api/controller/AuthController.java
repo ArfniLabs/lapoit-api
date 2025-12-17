@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// 로그인 / 회원가입/ 재발급 / 로그아웃
+// 로그인/ 회원가입/ 토큰발급/ 로그아웃
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -34,23 +34,32 @@ public class AuthController implements AuthControllerDocs {
 
     }
 
-    //아이디 중복 (temp 와 user 둘다 모두다 중복확인 거처야한다)
+    //아이디중복 (temp 와 user 에서 모두 중복처리된거거처야함
     @GetMapping("/check-id")
     public ResponseEntity<?> checkId(@RequestParam String userId) {
         authService.checkId(userId);
         return ResponseEntity.ok(
-                ApiResponseDto.success("Auth-200", "아이디 중복 확인 성공", null)
+                ApiResponseDto.success("Auth-200", "아이디중복 확인 성공", null)
         );
     }
-    //닉네임 중복
+    //닉네임중복
     @GetMapping("/check-nickname")
     public ResponseEntity<?> checkNickName(@RequestParam String userNickname) {
         authService.checkNickName(userNickname);
         return ResponseEntity.ok(
-                ApiResponseDto.success("Auth-200", "닉네임 중복 확인 성공", null)
+                ApiResponseDto.success("Auth-200", "닉네임중복 확인 성공", null)
         );
     }
-    //지점 불러오기
+
+    //전화번호 중복
+    @GetMapping("/check-phone")
+    public ResponseEntity<?> checkPhoneNumber(@RequestParam String phoneNumber) {
+        authService.checkPhoneNumber(phoneNumber);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-200", "전화번호 중복 확인 성공", null)
+        );
+    }
+    //지금은 인증 없음. 나중에 인증 코드 관리 혹은 DB에서 관리해야함
 
 
 
@@ -73,8 +82,8 @@ public class AuthController implements AuthControllerDocs {
                 ApiResponseDto.success("Auth-200", "로그인 성공", tokenResponse)
         );
     }
-    //이쪽은 인증 권한필요
-    //로그아웃 ( lastLogoutAt 방식이면  으로 액세스 토큰 관리하자)
+    //이쪽은 인증 권한요
+    //로그아웃 ( lastLogoutAt 방식이라면  캐시로 저장한 토큰 관리하고?
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails principal) {
         String userId=principal.getUsername();
@@ -86,17 +95,16 @@ public class AuthController implements AuthControllerDocs {
         );
     }
 
-    //아이디 찾기
+    //아이디찾기
     @PostMapping("/find-id")
     public ResponseEntity<?> findId(@RequestBody FindIdRequestDto findIdRequestDto){
         FindIdResponseDto id= authService.findId(findIdRequestDto);
 
         return ResponseEntity.ok(
-                ApiResponseDto.success("Auth-200", "아이디 찾기 성공", id)
+                ApiResponseDto.success("Auth-200", "아이디찾기 성공", id)
         );
 
     }
 
 
 }
-

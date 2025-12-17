@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
@@ -117,6 +118,14 @@ public class AuthService {
         TempUser existingTemp = tempUserMapper.findByNickname(userNickname);
 
         checkExistenceAndThrow(existing, existingTemp, ErrorCode.NICKNAME_ALREADY_EXISTS);
+    }
+
+    public void checkPhoneNumber(String phoneNumber) {
+        List<User> existingUsers = userMapper.findUserByPhoneNumber(phoneNumber);
+        TempUser existingTemp = tempUserMapper.findByPhoneNumber(phoneNumber);
+        if ((existingUsers != null && !existingUsers.isEmpty()) || existingTemp != null) {
+            throw new CustomException(ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
+        }
     }
 
     //토큰 재발급 과정

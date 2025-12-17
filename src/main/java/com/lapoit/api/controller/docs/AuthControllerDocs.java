@@ -46,6 +46,16 @@ public interface AuthControllerDocs {
     ResponseEntity<?> checkNickName(String userNickname);
 
     @Operation(
+            summary = "Check duplicate phone number",
+            description = "Validate that the given phone number is not already registered."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Phone number is available"),
+            @ApiResponse(responseCode = "409", description = "Phone number already exists")
+    })
+    ResponseEntity<?> checkPhoneNumber(String phoneNumber);
+
+    @Operation(
             summary = "Log in",
             description = "Authenticate with credentials and issue access/refresh tokens."
     )

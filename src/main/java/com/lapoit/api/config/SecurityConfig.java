@@ -52,6 +52,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/signup",
                                 "/api/v1/auth/check-id",
                                 "/api/v1/auth/check-nickname",
+                                "/api/v1/auth/check-phone",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
                                 "api/v1/auth/find-id",

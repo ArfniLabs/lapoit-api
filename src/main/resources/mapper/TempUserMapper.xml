@@ -44,6 +44,12 @@
         WHERE user_nickname = #{userNickname}
     </select>
 
+    <select id="findByPhoneNumber" parameterType="string" resultMap="UserResultMap">
+        SELECT *
+        FROM temp_user
+        WHERE phone_number = #{phoneNumber}
+    </select>
+
 
 
     <select id="finTempUsersById" resultMap="UserResultMap">
