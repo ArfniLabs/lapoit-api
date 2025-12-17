@@ -27,7 +27,11 @@ public enum ErrorCode {
     GAME_ALREADY_START(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임이 이미 진행중입니다."),
 
     // 서버/기타
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER-500", "서버 내부 오류가 발생했습니다.");
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER-500", "서버 내부 오류가 발생했습니다."),
+
+    //점수 관련
+    SCORE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCORE-404", "해당 스코어 테이블이 존재하지 않습니다."),
+    SCORE_ALREADY_EXISTS(HttpStatus.CONFLICT, "SCORE-409", "해당 스코어 테이블이 이미 존재합니다.");
 
 
     private final HttpStatus status;
