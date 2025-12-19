@@ -17,6 +17,9 @@ public enum ErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH-403", "접근 권한이 없습니다."),
     INVALID_TOKEN(HttpStatus.FORBIDDEN,"AUTH-407","유효하지 않은 토큰입니다." ),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,"AUTH-408" ,"유효하지 않은 리프레시 토큰입니다." ),
+    INVALID_STACK(HttpStatus.BAD_REQUEST, "GAME-400", "유효하지않은 리바인 스택입니다."),
+    REBUYIN_COUNT_ZERO(HttpStatus.BAD_REQUEST, "GAME-400", "리바인 스택이 0이하 입니다."),
+    REBUYIN_COUNT_FULL(HttpStatus.BAD_REQUEST, "GAME-400", "리바인 스택을 전부사용했습니다."),
 
     // 매장 관련
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE-404", "해당 지점이 존재하지 않습니다."),
@@ -35,7 +38,15 @@ public enum ErrorCode {
 
 
     // 서버/기타
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER-500", "서버 내부 오류가 발생했습니다.");
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER-500", "서버 오류가 발생했습니다."),
+    INVALID_REQUEST_BODY(HttpStatus.BAD_REQUEST, "REQ-400", "요청 바디(JSON)가 없거나 형식이 올바르지 않습니다."),
+    MISSING_PARAMETER(HttpStatus.BAD_REQUEST, "REQ-400-1", "필수 파라미터가 누락되었습니다."),
+    INVALID_PARAMETER_TYPE(HttpStatus.BAD_REQUEST, "REQ-400-2", "파라미터 타입이 올바르지 않습니다."),
+    INVALID_INPUT(HttpStatus.BAD_REQUEST, "REQ-400-4", "입력값이 올바르지 않습니다."),
+
+    // 점수 관련
+    SCORE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCORE-404", "해당 스코어 테이블이 존재하지 않습니다."),
+    SCORE_ALREADY_EXISTS(HttpStatus.CONFLICT, "SCORE-409", "해당 스코어 테이블이 이미 존재합니다.");
 
 
     private final HttpStatus status;
