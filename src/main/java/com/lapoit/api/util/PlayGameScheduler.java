@@ -4,6 +4,7 @@ import com.lapoit.api.domain.GameBlind;
 import com.lapoit.api.dto.playgame.PlayGameRow;
 import com.lapoit.api.mapper.GameBlindMapper;
 import com.lapoit.api.mapper.PlayGameMapper;
+import com.lapoit.api.mapper.UserGameMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

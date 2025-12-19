@@ -16,6 +16,8 @@ public class PlayGameController {
 
     private final PlayGameQueryService playGameQueryService;
 
+
+    /** 지점별 모든 게임 조회*/
     @GetMapping("/store/{storeId}")
     public ResponseEntity<ApiResponseDto<?>> getGamesByStore(
             @PathVariable("storeId") Long storeId
@@ -25,6 +27,19 @@ public class PlayGameController {
                         "GAME-200",
                         "지점별 오늘 게임 조회 성공",
                         playGameQueryService.getGamesByStore(storeId)
+                )
+        );
+    }
+    /** 상세 게임 조회*/
+    @GetMapping("/{playGameId}")
+    public ResponseEntity<ApiResponseDto<?>> getGameDetail(
+            @PathVariable("playGameId") Long playGameId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "GAME-200",
+                        "게임 상세 정보를 조회했습니다.",
+                        playGameQueryService.getGameDetail(playGameId)
                 )
         );
     }
