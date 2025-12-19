@@ -174,12 +174,67 @@
     </update>
 
 
+
+    <update id="increaseRebuyinCount">
+        UPDATE play_game
+        SET rebuyin_count = rebuyin_count + 1
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+    <update id="addStack">
+        UPDATE play_game
+        SET total_stack = total_stack + #{stack}
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+    <update id="increaseNowPeople">
+        UPDATE play_game
+        SET now_people = now_people + 1
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+
+    <update id="subtractStack">
+        UPDATE play_game
+        SET total_stack = total_stack - #{stack}
+        WHERE play_game_id = #{playGameId}
+    </update>
+
+    <update id="decreaseRebuyinCount">
+        UPDATE play_game
+        SET rebuyin_count = rebuyin_count - 1
+        WHERE play_game_id = #{playGameId}
+    </update>
+
     <update id="decreaseNowPeople">
         UPDATE play_game
         SET now_people = now_people - 1
         WHERE play_game_id = #{playGameId}
-        AND now_people > 0
     </update>
+
+    <select id="findById" resultType="com.lapoit.api.dto.playgame.PlayGameRow">
+        SELECT
+        pg.play_game_id   AS playGameId,
+        pg.game_id        AS gameId,
+        pg.store_id       AS storeId,
+        pg.game_subtitle  AS gameSubtitle,
+        g.game_name       AS gameName,
+        pg.start_at       AS startAt,
+        pg.level_start_at AS levelStartAt,
+        pg.game_level     AS gameLevel,
+        pg.total_people   AS totalPeople,
+        pg.now_people     AS nowPeople,
+        pg.rebuyin_count  AS rebuyinCount,
+        pg.total_stack    AS totalStack,
+        pg.game_status    AS gameStatus,
+        pg.total_stop_time AS totalStopTime,
+        pg.level_stop_time AS levelStopTime
+        FROM play_game pg
+        JOIN game g ON pg.game_id = g.game_id
+        WHERE pg.play_game_id = #{playGameId}
+    </select>
+
+
 
 
 

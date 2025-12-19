@@ -1,21 +1,18 @@
 package com.lapoit.api.service;
 
 import com.lapoit.api.domain.Game;
+import com.lapoit.api.domain.GameReEntry;
 import com.lapoit.api.domain.User;
-import com.lapoit.api.dto.playgame.AdminJoinGameResponse;
-import com.lapoit.api.dto.playgame.AdminPlayGameCreateRequest;
-import com.lapoit.api.dto.playgame.AdminPlayGameResponse;
-import com.lapoit.api.dto.playgame.PlayGameResponse;
+import com.lapoit.api.domain.UserGame;
+import com.lapoit.api.dto.playgame.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
-import com.lapoit.api.mapper.GameMapper;
-import com.lapoit.api.mapper.PlayGameMapper;
-import com.lapoit.api.mapper.UserGameMapper;
-import com.lapoit.api.mapper.UserMapper;
+import com.lapoit.api.mapper.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -24,6 +21,7 @@ import java.util.List;
 public class AdminPlayGameService {
 
     private final GameMapper gameMapper;
+    private final GameReEntryMapper gameReEntryMapper;
     private final PlayGameMapper playGameMapper;
     private final UserGameMapper userGameMapper;
     private final UserMapper userMapper;
@@ -92,20 +90,19 @@ public class AdminPlayGameService {
 
         // 1️⃣ 게임 존재 확인
         PlayGameResponse game = playGameMapper.findPlayGameById(playGameId);
-        Game gameInfo = gameMapper.findById(game.getGameId());
         if (game == null) {
             throw new CustomException(ErrorCode.GAME_NOT_FOUND);
         }
+
+        Game gameInfo = gameMapper.findById(game.getGameId());
 
         // 2️⃣ 종료된 게임 체크
         if ("FINISHED".equals(game.getGameStatus())) {
             throw new CustomException(ErrorCode.GAME_ALREADY_FINISHED);
         }
 
-        // 3️⃣ play_game_id 기준 중복 참가 방지
-        boolean alreadyJoined =
-                userGameMapper.existsByPlayGameIdAndUserId(playGameId, userId);
-        if (alreadyJoined) {
+        // 3️⃣ 중복 참가 방지 (같은 playGame)
+        if (userGameMapper.existsByPlayGameIdAndUserId(playGameId, userId)) {
             throw new CustomException(ErrorCode.GAME_ALREADY_JOINED);
         }
 
@@ -115,28 +112,37 @@ public class AdminPlayGameService {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // 5️⃣ 참가 INSERT
+        // ===============================
+        // ✅ 5️⃣ 출석 체크 로직
+        // ===============================
+        String today = LocalDate.now().toString(); // yyyy-MM-dd
+
+        boolean alreadyAttendedToday =
+                userGameMapper.existsAttendanceToday(userId, today);
+
+        // 6️⃣ 참가 INSERT (attendance_date는 항상 오늘)
         userGameMapper.insertUserGame(
                 playGameId,
                 userId,
                 game.getGameId(),
-                game.getStoreId()
+                game.getStoreId(),
+                today
         );
 
-
-
+        // 8️⃣ 스택 + 인원 증가
         playGameMapper.addStackOnJoin(
                 playGameId,
-                gameInfo.getGameStack() // startingStack
+                gameInfo.getGameStack()
         );
 
-        // 7️⃣ 응답 반환
+        // 9️⃣ 응답
         return AdminJoinGameResponse.builder()
                 .userId(user.getId())
                 .nickname(user.getUserNickname())
                 .name(user.getUserName())
                 .build();
     }
+
 
     public PlayGameResponse outPlayer(Long playGameId, Long userId) {
 
@@ -165,5 +171,95 @@ public class AdminPlayGameService {
         // 6. 최신 게임 정보 반환
         return playGameMapper.findPlayGameById(playGameId);
     }
+
+
+    @Transactional
+    public void rebuy(Long playGameId, Long userId) {
+
+        // 0️⃣ 게임 상태 체크
+        String gameStatus = playGameMapper.findStatusById(playGameId);
+        if (!"STARTED".equals(gameStatus)) {
+            throw new CustomException(ErrorCode.GAME_NOT_STARTED);
+        }
+
+        // 1️⃣ 유저 게임 상태 조회
+        UserGame userGame =
+                userGameMapper.findByPlayGameIdAndUserId(playGameId, userId);
+
+        int nextRebuyCount = userGame.getRebuyinCount() + 1;
+
+        // 2️⃣ 리바인 정책 조회
+        GameReEntry reEntry =
+                gameReEntryMapper.findByGameIdAndCount(
+                        userGame.getGameId(),
+                        nextRebuyCount
+                );
+
+        if (reEntry == null) {
+            throw new CustomException(ErrorCode.REBUYIN_COUNT_FULL);
+        }
+
+        // 3️⃣ 유저 리바인 횟수 증가
+        userGameMapper.increaseRebuyCount(userGame.getUserGameId());
+
+        // 4️⃣ 게임 전체 리바인 카운트 증가
+        playGameMapper.increaseRebuyinCount(playGameId);
+
+        // 5️⃣ 스택 증가
+        playGameMapper.addStack(playGameId, reEntry.getReEntryStack());
+
+        // 6️⃣ 탈락 유저라면 부활
+        if ("OUT".equals(userGame.getStatus())) {
+            userGameMapper.reviveUser(userGame.getUserGameId());
+            playGameMapper.increaseNowPeople(playGameId);
+        }
+    }
+
+    @Transactional
+    public void cancelRebuy(Long playGameId, Long userId) {
+
+        // 1️⃣ 유저 게임 조회
+        UserGame userGame =
+                userGameMapper.findByPlayGameIdAndUserId(playGameId, userId);
+
+        if (userGame == null) {
+            throw new IllegalArgumentException("유저가 해당 게임에 참가하지 않음");
+        }
+
+        int currentRebuyCount = userGame.getRebuyinCount();
+
+        if (currentRebuyCount <= 0) {
+            throw new IllegalStateException("취소할 리바인이 없음");
+        }
+
+        // 2️⃣ 취소 대상 리바인 정책 조회
+        GameReEntry reEntry =
+                gameReEntryMapper.findByGameIdAndCount(
+                        userGame.getGameId(),
+                        currentRebuyCount
+                );
+
+        if (reEntry == null) {
+            throw new IllegalStateException("리바인 정책 없음");
+        }
+
+        // 3️⃣ 유저 리바인 횟수 감소
+        userGameMapper.decreaseRebuyCount(userGame.getUserGameId());
+
+        // 4️⃣ 게임 전체 리바인 카운트 감소
+        playGameMapper.decreaseRebuyinCount(playGameId);
+
+        // 5️⃣ 스택 감소
+        playGameMapper.subtractStack(playGameId, reEntry.getReEntryStack());
+
+        // 6️⃣ 부활 리바인 취소라면 다시 탈락 처리
+        if ("ALIVE".equals(userGame.getStatus()) && currentRebuyCount == 1) {
+            userGameMapper.markDie(userGame.getUserGameId());
+            playGameMapper.decreaseNowPeople(playGameId);
+        }
+    }
+
+
+
 }
 

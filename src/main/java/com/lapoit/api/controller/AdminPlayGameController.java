@@ -1,10 +1,7 @@
 package com.lapoit.api.controller;
 
 import com.lapoit.api.dto.ApiResponseDto;
-import com.lapoit.api.dto.playgame.AdminJoinGameRequest;
-import com.lapoit.api.dto.playgame.AdminPlayGameCreateRequest;
-import com.lapoit.api.dto.playgame.AdminPlayGameResponse;
-import com.lapoit.api.dto.playgame.PlayGameResponse;
+import com.lapoit.api.dto.playgame.*;
 import com.lapoit.api.service.AdminPlayGameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -93,6 +90,33 @@ public class AdminPlayGameController {
                 )
         );
     }
+
+
+    /** 리바인 증가 */
+    @PatchMapping("/{playGameId}/rebuy/{userId}")
+    public ResponseEntity<?> rebuy(
+            @PathVariable("playGameId") Long playGameId,
+            @PathVariable("userId") Long userId
+    ) {
+        adminPlayGameService.rebuy(playGameId, userId);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("GAME-210", "리바인 완료", null)
+        );
+    }
+
+
+    /** 리바인 감소(관리자 실수 복구용) */
+    @PatchMapping("/{playGameId}/rebuy/cancel")
+    public ResponseEntity<ApiResponseDto<?>> cancelRebuy(
+            @PathVariable("playGameId") Long playGameId,
+            @RequestBody RebuyCancelRequest request
+    ) {
+        adminPlayGameService.cancelRebuy(playGameId, request.getUserId());
+        return ResponseEntity.ok(
+                ApiResponseDto.success("REBUY-204", "리바인 취소 완료", null)
+        );
+    }
+
 
 
 

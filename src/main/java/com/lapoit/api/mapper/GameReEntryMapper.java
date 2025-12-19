@@ -22,4 +22,9 @@ public interface GameReEntryMapper {
 
 
     List<GameReEntry> findByGameId(Long gameId);
+
+    GameReEntry findByGameIdAndCount(
+            @Param("gameId") Long gameId,
+            @Param("count") Integer count
+    );
 }

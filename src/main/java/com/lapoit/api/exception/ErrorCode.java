@@ -32,6 +32,9 @@ public enum ErrorCode {
     GAME_ALREADY_JOINED(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임에 이미 참가한 유저입니다."),
     USER_NOT_IN_GAME(HttpStatus.BAD_REQUEST, "GAME-400", "해당 게임에 참가하지 않은 유저입니다."),
     USER_ALREADY_OUT(HttpStatus.BAD_REQUEST, "GAME-400", "이미 게임에서 아웃된 유저입니다."),
+    INVALID_STACK(HttpStatus.BAD_REQUEST, "GAME-400", "유효하지않은 리바인 스택입니다."),
+    REBUYIN_COUNT_ZERO(HttpStatus.BAD_REQUEST, "GAME-400", "리바인 스택이 0이하 입니다."),
+    REBUYIN_COUNT_FULL(HttpStatus.BAD_REQUEST, "GAME-400", "리바인 스택을 전부사용했습니다."),
 
 
     // 서버/기타
