@@ -12,6 +12,11 @@ public enum ErrorCode {
     ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "USER-4031", "비활성화된 계정입니다."),
     ID_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-4091", "이미 존재하는 아이디입니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-4092", "이미 존재하는 닉네임 입니다."),
+    PHONE_NUMBER_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-4093", "이미 사용 중인 전화번호입니다."),
+    USER_INFO_MISMATCH_NAME(HttpStatus.BAD_REQUEST, "USER-407", "이름 정보가 일치하지 않습니다."),
+    USER_INFO_MISMATCH_NUMBER(HttpStatus.BAD_REQUEST, "USER-408", "전화번호 정보가 일치하지 않습니다."),
+
+
     // 인증/인가
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH-401", "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH-403", "접근 권한이 없습니다."),
