@@ -38,4 +38,8 @@ public interface  UserMapper {
             @Param("userNickname") String userNickname,
             @Param("storeId") Integer storeId
     );
+
+
+
+    int updateUserPointDelta(@Param("userId") String userId, @Param("delta") Long delta);
 }

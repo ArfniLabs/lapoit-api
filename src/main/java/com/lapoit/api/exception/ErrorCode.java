@@ -51,7 +51,9 @@ public enum ErrorCode {
 
     // 점수 관련
     SCORE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCORE-404", "해당 스코어 테이블이 존재하지 않습니다."),
-    SCORE_ALREADY_EXISTS(HttpStatus.CONFLICT, "SCORE-409", "해당 스코어 테이블이 이미 존재합니다.");
+    SCORE_ALREADY_EXISTS(HttpStatus.CONFLICT, "SCORE-409", "해당 스코어 테이블이 이미 존재합니다."),
+    POINT_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"POINT-400","포인트가 부족합니다." ),
+    SCORE_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"SCORE-400","승점이 부족합니다.");
 
 
     private final HttpStatus status;

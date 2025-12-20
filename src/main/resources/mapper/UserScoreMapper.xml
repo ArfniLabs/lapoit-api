@@ -63,4 +63,20 @@
         )
     </insert>
 
+    <update id="updateUserScore">
+        UPDATE user_score
+        SET score = score + #{score}
+        WHERE user_id = #{userId}
+        AND store_id = #{storeId}
+        AND score + #{score} >= 0
+    </update>
+
+    <insert id="upsertUserScore">
+        INSERT INTO user_score (user_id, store_id, score)
+        VALUES (#{userId}, #{storeId}, 0)
+        ON DUPLICATE KEY UPDATE
+        score = score
+    </insert>
+
+
 </mapper>

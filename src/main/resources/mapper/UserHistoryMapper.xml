@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.UserHistoryMapper">
+
+
+    <resultMap id="UserHistoryResultMap"
+               type="com.lapoit.api.domain.UserHistory">
+
+        <id property="historyId" column="history_id"/>
+
+        <result property="userId" column="user_id"/>
+        <result property="storeId" column="store_id"/>
+
+        <result property="scoreDelta" column="score_delta"/>
+        <result property="pointDelta" column="point_delta"/>
+
+        <result property="createdAt" column="created_at"/>
+
+    </resultMap>
+
+    <select id="findByUserIdAndStoreId"
+            resultMap="UserHistoryResultMap">
+        SELECT *
+        FROM user_history
+        WHERE user_id = #{userId}
+        AND store_id = #{storeId}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByUserIdAndStoreIdPaging"
+            resultMap="UserHistoryResultMap">
+        SELECT *
+        FROM user_history
+        WHERE user_id = #{userId}
+        AND store_id = #{storeId}
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="findByStoreId"
+            resultMap="UserHistoryResultMap">
+        SELECT *
+        FROM user_history
+        WHERE store_id = #{storeId}
+        ORDER BY created_at DESC
+    </select>
+
+    <insert id="insert"
+            parameterType="com.lapoit.api.domain.UserHistory"
+            useGeneratedKeys="true"
+            keyProperty="historyId">
+
+        INSERT INTO user_history (
+        user_id,
+        store_id,
+        score_delta,
+        point_delta,
+        created_at
+        ) VALUES (
+        #{userId},
+        #{storeId},
+        #{scoreDelta},
+        #{pointDelta},
+        NOW()
+        )
+    </insert>
+
+    <select id="findUserHistory"
+            resultMap="UserHistoryResultMap">
+        SELECT *
+        FROM user_history
+        WHERE user_id = #{userId}
+        AND store_id = #{storeId}
+        <if test="startDate != null">
+            AND created_at &gt;= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND created_at &lt;= #{endDate}
+        </if>
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+</mapper>

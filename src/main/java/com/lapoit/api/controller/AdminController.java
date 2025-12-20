@@ -2,17 +2,18 @@ package com.lapoit.api.controller;
 
 import com.lapoit.api.controller.docs.AdminControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
-import com.lapoit.api.dto.admin.ResetPasswordRequestDto;
-import com.lapoit.api.dto.admin.TempUserResponseDto;
-import com.lapoit.api.dto.admin.UserListResponseDto;
+import com.lapoit.api.dto.admin.*;
 import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.jwt.JwtTokenProvider;
 import com.lapoit.api.service.AdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -121,6 +122,51 @@ public class AdminController implements AdminControllerDocs {
     }
 
 
+    //특정 회원 포인트 변경
+    @PatchMapping("/users/{userId}/point")
+    public ResponseEntity<?> updateUserPoint(        @PathVariable String userId,
+                                                     @RequestBody UpdateUserPointRequest request){
+
+        adminService.updateUserPoint(userId,request);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "회원 포인트 변경 성공", null)
+        );
+
+    }
+    //특정 회원 승점 지급/변경
+    @PatchMapping("/users/{userId}/score")
+    public ResponseEntity<?> updateUserScore(        @PathVariable String userId,
+                                                     @RequestBody UpdateUserScoreRequest request){
+
+        adminService.updateUserScore(userId,request);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "회원 승점 변경 성공", null)
+        );
+
+    }
+
+    //특정 회원 포인트/승점 기록 조회
+    @GetMapping("/users/{userId}/history")
+    public ResponseEntity<?> getUserHistory(
+            @PathVariable String userId,
+
+            @RequestParam(required = false) Long storeId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate endDate,
+
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+
+        List<UserHistoryResponse> response =
+                adminService.getUserHistory(userId, storeId, startDate, endDate, page, size);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "회원 기록 조회 성공", response)
+        );
+    }
 
 
 }

@@ -13,4 +13,9 @@ public interface UserScoreMapper {
     UserScore findByUserIdAndStoreId(@Param("userId") Long userId,@Param("storeId") Long storeId);
 
     void save(UserScore newScore);
+
+    int updateUserScore(@Param("userId") Long userId, @Param("storeId") Long storeId,  @Param("score") int score);
+
+    void upsertUserScore(@Param("userId") Long userId,
+                         @Param("storeId") Long storeId);
 }

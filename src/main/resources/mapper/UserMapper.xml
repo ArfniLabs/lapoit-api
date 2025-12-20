@@ -104,4 +104,12 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateUserPointDelta">
+        UPDATE user
+        SET point = point + #{delta},
+        update_at = NOW()
+        WHERE user_id = #{userId}
+        AND point + #{delta} >= 0
+    </update>
+
 </mapper>
