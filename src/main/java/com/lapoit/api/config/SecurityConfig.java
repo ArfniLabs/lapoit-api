@@ -20,6 +20,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -48,6 +53,7 @@ public class SecurityConfig {
                 // 요청별 인가(권한) 설정
                 .authorizeHttpRequests(auth -> auth
                         // 로그인/회원가입, Swagger, 기타 공개 API
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/api/v1/auth/signup",
                                 "/api/v1/auth/check-id",
@@ -55,7 +61,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/check-phone",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
-                                "api/v1/auth/find-id",
+                                "/api/v1/auth/find-id",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
@@ -70,7 +76,8 @@ public class SecurityConfig {
                 )
 
                 // CORS 설정은 WebConfig에서 따로
-                .cors(Customizer.withDefaults());
+//                .cors(Customizer.withDefaults());
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         //  JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 끼워 넣기
         http.addFilterBefore(
@@ -101,5 +108,18 @@ public class SecurityConfig {
         provider.setUserDetailsService(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
