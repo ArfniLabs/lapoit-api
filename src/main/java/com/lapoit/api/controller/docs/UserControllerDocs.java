@@ -107,4 +107,15 @@ public interface UserControllerDocs {
             @Parameter(description = "Page number (0-based)") int page,
             @Parameter(description = "Page size") int size
     );
+
+    @Operation(
+            summary = "Delete my account",
+            description = "Delete the authenticated user and all related records.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Account deleted"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    ResponseEntity<?> deleteMe(@Parameter(hidden = true) CustomUserDetails principal);
 }

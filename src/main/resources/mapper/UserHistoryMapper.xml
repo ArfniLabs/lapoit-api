@@ -84,4 +84,9 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
+    <delete id="deleteByUserId">
+        DELETE FROM user_history
+        WHERE user_id = #{userId}
+    </delete>
+
 </mapper>

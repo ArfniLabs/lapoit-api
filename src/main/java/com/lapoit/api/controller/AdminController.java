@@ -169,4 +169,24 @@ public class AdminController implements AdminControllerDocs {
     }
 
 
+    //유저 비활성화
+    @PatchMapping("/users/{userId}/deactivate")
+    public ResponseEntity<?> deactivateUser(@PathVariable String userId) {
+        adminService.deactivateUser(userId);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "유저 비활성화 성공", null)
+        );
+    }
+
+    //유저 활성화
+    @PatchMapping("/users/{userId}/activate")
+    public ResponseEntity<?> activateUser(@PathVariable String userId) {
+        adminService.activateUser(userId);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Admin-200", "유저 활성화 성공", null)
+        );
+    }
+
 }

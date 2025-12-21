@@ -84,4 +84,6 @@ public interface UserGameMapper {
             @Param("endDate") LocalDate endDate
     );
 
+    int deleteByUserId(@Param("userId") Long userId);
+
 }

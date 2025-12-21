@@ -18,4 +18,6 @@ public interface UserScoreMapper {
 
     void upsertUserScore(@Param("userId") Long userId,
                          @Param("storeId") Long storeId);
+
+    int deleteByUserId(@Param("userId") Long userId);
 }

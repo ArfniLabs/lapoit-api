@@ -154,4 +154,15 @@ public interface AdminControllerDocs {
             @Parameter(description = "Page number (0-based)") int page,
             @Parameter(description = "Page size") int size
     );
+
+    @Operation(
+            summary = "Deactivate user",
+            description = "Update a user's status to INACTIVE.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User deactivated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    ResponseEntity<?> deactivateUser(@Parameter(description = "User ID") String userId);
 }

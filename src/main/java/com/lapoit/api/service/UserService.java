@@ -10,6 +10,7 @@ import com.lapoit.api.dto.user.UserResponseDto;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.mapper.TempUserMapper;
+import com.lapoit.api.mapper.UserGameMapper;
 import com.lapoit.api.mapper.UserHistoryMapper;
 import com.lapoit.api.mapper.UserMapper;
 import com.lapoit.api.mapper.UserScoreMapper;
@@ -32,6 +33,7 @@ public class UserService {
     private final TempUserMapper tempUserMapper;
     private final PasswordEncoder passwordEncoder;
     private final UserHistoryMapper userHistoryMapper;
+    private final UserGameMapper userGameMapper;
 
     public UserResponseDto getMyInfo(String userId) {
         User user= userMapper.findByUserId(userId);
@@ -152,6 +154,21 @@ public class UserService {
                 .toList();
 
 
+    }
+
+    @Transactional
+    public void deleteUser(String userId) {
+        User user = userMapper.findByUserId(userId);
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Long id = user.getId();
+        userGameMapper.deleteByUserId(id);
+        userHistoryMapper.deleteByUserId(id);
+        userScoreMapper.deleteByUserId(id);
+        tempUserMapper.deleteByUserId(userId);
+        userMapper.deleteById(id);
     }
 }
 

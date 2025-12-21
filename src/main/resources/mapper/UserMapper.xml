@@ -112,4 +112,16 @@
         AND point + #{delta} >= 0
     </update>
 
+    <update id="updateStatusByUserId">
+        UPDATE user
+        SET status = #{status},
+        update_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM user
+        WHERE id = #{id}
+    </delete>
+
 </mapper>

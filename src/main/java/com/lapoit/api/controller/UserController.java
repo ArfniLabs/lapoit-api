@@ -115,4 +115,15 @@ public class UserController implements UserControllerDocs {
     }
 
 
+    //유저 회원가입 탈퇴
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteMe(@AuthenticationPrincipal CustomUserDetails principal) {
+        String userId = principal.getUsername();
+        userService.deleteUser(userId);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success("USER-200", "탈퇴 성공", null)
+        );
+    }
+
 }

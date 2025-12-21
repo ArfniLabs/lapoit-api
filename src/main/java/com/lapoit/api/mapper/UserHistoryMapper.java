@@ -22,4 +22,6 @@ public interface UserHistoryMapper {
     );
 
     void insert(UserHistory build);
+
+    int deleteByUserId(@Param("userId") Long userId);
 }

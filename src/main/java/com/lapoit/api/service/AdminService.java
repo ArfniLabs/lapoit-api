@@ -231,4 +231,19 @@ public class AdminService {
                 .toList();
     }
 
+    @Transactional
+    public void deactivateUser(String userId) {
+        User user = userMapper.findByUserId(userId);
+        if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
+
+        userMapper.updateStatusByUserId(userId, "INACTIVE");
+    }
+    @Transactional
+    public void activateUser(String userId) {
+        User user = userMapper.findByUserId(userId);
+        if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
+
+        userMapper.updateStatusByUserId(userId, "ACTIVE");
+        }
+
 }

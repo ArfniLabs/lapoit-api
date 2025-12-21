@@ -42,4 +42,8 @@ public interface  UserMapper {
 
 
     int updateUserPointDelta(@Param("userId") String userId, @Param("delta") Long delta);
+
+    int updateStatusByUserId(@Param("userId") String userId, @Param("status") String status);
+
+    int deleteById(@Param("id") Long id);
 }

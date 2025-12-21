@@ -78,5 +78,9 @@
         score = score
     </insert>
 
+    <delete id="deleteByUserId">
+        DELETE FROM user_score
+        WHERE user_id = #{userId}
+    </delete>
 
 </mapper>
