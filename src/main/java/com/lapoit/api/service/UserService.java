@@ -1,13 +1,16 @@
 package com.lapoit.api.service;
 
 import com.lapoit.api.domain.User;
+import com.lapoit.api.domain.UserHistory;
 import com.lapoit.api.domain.UserScore;
 import com.lapoit.api.dto.user.CreateStoreRequestDto;
+import com.lapoit.api.dto.user.HistoryResponse;
 import com.lapoit.api.dto.user.UpdateProfileRequestDto;
 import com.lapoit.api.dto.user.UserResponseDto;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.mapper.TempUserMapper;
+import com.lapoit.api.mapper.UserHistoryMapper;
 import com.lapoit.api.mapper.UserMapper;
 import com.lapoit.api.mapper.UserScoreMapper;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,6 +31,7 @@ public class UserService {
     private final UserScoreMapper userScoreMapper;
     private final TempUserMapper tempUserMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UserHistoryMapper userHistoryMapper;
 
     public UserResponseDto getMyInfo(String userId) {
         User user= userMapper.findByUserId(userId);
@@ -125,6 +131,27 @@ public class UserService {
         }
 
         userMapper.updateProfile(user.getId(), newNickname, newStoreId);
+    }
+
+
+    public List<HistoryResponse> getUserHistory(String userId, Long storeId,LocalDate startDate, LocalDate endDate, int page, int size) {
+        User user = userMapper.findByUserId(userId);
+        if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        int offset = page * size;
+
+        LocalDateTime from = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime to   = endDate != null ? endDate.atTime(23, 59, 59) : null;
+
+        List<UserHistory> histories =
+                userHistoryMapper.findUserHistory(
+                        user.getId() , storeId, from, to, size, offset
+                );
+
+        return histories.stream()
+                .map(HistoryResponse::from)
+                .toList();
+
+
     }
 }
 
