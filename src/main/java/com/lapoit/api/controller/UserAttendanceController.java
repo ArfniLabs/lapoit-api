@@ -1,5 +1,6 @@
 package com.lapoit.api.controller;
 
+import com.lapoit.api.controller.docs.UserAttendanceControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
-public class UserAttendanceController {
+public class UserAttendanceController implements UserAttendanceControllerDocs {
 
     private final AttendanceService attendanceService;
 

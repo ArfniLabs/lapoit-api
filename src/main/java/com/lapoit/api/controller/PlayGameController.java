@@ -1,5 +1,6 @@
 package com.lapoit.api.controller;
 
+import com.lapoit.api.controller.docs.PlayGameControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.service.PlayGameQueryService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/play-game")
 @RequiredArgsConstructor
-public class PlayGameController {
+public class PlayGameController implements PlayGameControllerDocs {
 
     private final PlayGameQueryService playGameQueryService;
 

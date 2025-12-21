@@ -1,5 +1,8 @@
 package com.lapoit.api.controller.docs;
 
+import com.lapoit.api.dto.admin.ResetPasswordRequestDto;
+import com.lapoit.api.dto.admin.UpdateUserPointRequest;
+import com.lapoit.api.dto.admin.UpdateUserScoreRequest;
 import com.lapoit.api.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+
+import java.time.LocalDate;
 
 @Tag(name = "Admin", description = "Admin-facing user management APIs")
 public interface AdminControllerDocs {
@@ -92,4 +97,61 @@ public interface AdminControllerDocs {
             @ApiResponse(responseCode = "200", description = "Users returned")
     })
     ResponseEntity<?> findUserByNickname(@Parameter(description = "Nickname to search") String userNickname);
+
+    @Operation(
+            summary = "Reset user password",
+            description = "Reset a user's password using identifying details.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password reset"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    ResponseEntity<?> resetPassword(ResetPasswordRequestDto dto);
+
+    @Operation(
+            summary = "Update user point",
+            description = "Update a user's point balance.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User point updated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    ResponseEntity<?> updateUserPoint(
+            @Parameter(description = "User ID") String userId,
+            UpdateUserPointRequest request
+    );
+
+    @Operation(
+            summary = "Update user score",
+            description = "Update a user's score for a store.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User score updated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    ResponseEntity<?> updateUserScore(
+            @Parameter(description = "User ID") String userId,
+            UpdateUserScoreRequest request
+    );
+
+    @Operation(
+            summary = "Get user history",
+            description = "Return score history for a user.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "History returned"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    ResponseEntity<?> getUserHistory(
+            @Parameter(description = "User ID") String userId,
+            @Parameter(description = "Filter by store ID") Long storeId,
+            @Parameter(description = "Start date (yyyy-MM-dd)") LocalDate startDate,
+            @Parameter(description = "End date (yyyy-MM-dd)") LocalDate endDate,
+            @Parameter(description = "Page number (0-based)") int page,
+            @Parameter(description = "Page size") int size
+    );
 }

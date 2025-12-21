@@ -1,5 +1,6 @@
 package com.lapoit.api.controller;
 
+import com.lapoit.api.controller.docs.AdminPlayGameControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.playgame.*;
 import com.lapoit.api.service.AdminPlayGameService;
@@ -12,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/play-game")
 @RequiredArgsConstructor
-public class AdminPlayGameController {
+public class AdminPlayGameController implements AdminPlayGameControllerDocs {
 
     private final AdminPlayGameService adminPlayGameService;
 

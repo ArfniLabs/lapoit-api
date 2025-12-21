@@ -1,5 +1,6 @@
 package com.lapoit.api.controller.docs;
 
+import com.lapoit.api.dto.user.CreateStoreRequestDto;
 import com.lapoit.api.dto.user.PasswordCheckRequestDto;
 import com.lapoit.api.dto.user.UpdatePasswordRequestDto;
 import com.lapoit.api.dto.user.UpdateProfileRequestDto;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+
+import java.time.LocalDate;
 
 @Tag(name = "User", description = "User self-service APIs")
 public interface UserControllerDocs {
@@ -25,6 +28,32 @@ public interface UserControllerDocs {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     ResponseEntity<?> getMyInfo(@Parameter(hidden = true) CustomUserDetails principal);
+
+    @Operation(
+            summary = "Create score table",
+            description = "Create a score record for a store for the authenticated user.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Score table created"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    ResponseEntity<?> createScoreTable(
+            @Parameter(hidden = true) CustomUserDetails principal,
+            CreateStoreRequestDto dto
+    );
+
+    @Operation(
+            summary = "List my scores",
+            description = "Return score list for the authenticated user.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Scores returned"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    ResponseEntity<?> getMyScoreList(@Parameter(hidden = true) CustomUserDetails principal);
 
     @Operation(
             summary = "Check password",
@@ -60,4 +89,22 @@ public interface UserControllerDocs {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     ResponseEntity<?> updateProfile(@Parameter(hidden = true) CustomUserDetails principal, UpdateProfileRequestDto dto);
+
+    @Operation(
+            summary = "Get my history",
+            description = "Return score history for the authenticated user.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "History returned"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    ResponseEntity<?> getUserHistory(
+            @Parameter(hidden = true) CustomUserDetails principal,
+            @Parameter(description = "Filter by store ID") Long storeId,
+            @Parameter(description = "Start date (yyyy-MM-dd)") LocalDate startDate,
+            @Parameter(description = "End date (yyyy-MM-dd)") LocalDate endDate,
+            @Parameter(description = "Page number (0-based)") int page,
+            @Parameter(description = "Page size") int size
+    );
 }
