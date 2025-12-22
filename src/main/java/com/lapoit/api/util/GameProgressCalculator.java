@@ -10,8 +10,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-
 @Component
 public class GameProgressCalculator {
 
@@ -20,15 +18,19 @@ public class GameProgressCalculator {
             List<GameBlind> blinds
     ) {
 
-        // 1️⃣ 계산 불가 케이스
+        int averageStack = calculateAverageStack(game);
+
         if (!isCalculatable(game, blinds)) {
-            return baseResponse(game);
+            return baseResponse(game, averageStack);
         }
 
         GameBlind currentBlind = findCurrentBlind(game, blinds);
         GameBlind nextBlind = findNextBlind(game, blinds);
 
-        long elapsedSeconds = calculateElapsedSeconds(game);
+        long elapsedSeconds =
+                Duration.between(game.getLevelStartAt(), LocalDateTime.now()).getSeconds()
+                        - game.getLevelStopTime();
+
         int levelDurationSeconds = currentBlind.getDuration() * 60;
 
         int remainingSeconds =
@@ -38,13 +40,24 @@ public class GameProgressCalculator {
                 game,
                 currentBlind,
                 nextBlind,
-                remainingSeconds
+                remainingSeconds,
+                averageStack
         );
     }
 
     /* =========================
-       계산 가능 여부
+       평균 스택 계산 (⭐ 핵심)
        ========================= */
+    private int calculateAverageStack(PlayGameRow game) {
+        if (game.getNowPeople() == null || game.getNowPeople() <= 0) {
+            return 0;
+        }
+        if (game.getTotalStack() == null) {
+            return 0;
+        }
+        return game.getTotalStack() / game.getNowPeople();
+    }
+
     private boolean isCalculatable(PlayGameRow game, List<GameBlind> blinds) {
         return "STARTED".equals(game.getGameStatus())
                 && game.getLevelStartAt() != null
@@ -52,22 +65,6 @@ public class GameProgressCalculator {
                 && !blinds.isEmpty();
     }
 
-    /* =========================
-       경과 시간 계산 (⭐ 핵심)
-       ========================= */
-    private long calculateElapsedSeconds(PlayGameRow game) {
-        return Math.max(
-                Duration.between(
-                        game.getLevelStartAt(),
-                        LocalDateTime.now()
-                ).getSeconds(),
-                0
-        );
-    }
-
-    /* =========================
-       블라인드 조회
-       ========================= */
     private GameBlind findCurrentBlind(
             PlayGameRow game,
             List<GameBlind> blinds
@@ -77,8 +74,7 @@ public class GameProgressCalculator {
                 .findFirst()
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "현재 레벨 블라인드가 존재하지 않습니다. level="
-                                        + game.getGameLevel()
+                                "현재 레벨 블라인드 없음. level=" + game.getGameLevel()
                         )
                 );
     }
@@ -93,14 +89,12 @@ public class GameProgressCalculator {
                 .orElse(null);
     }
 
-    /* =========================
-       응답 생성
-       ========================= */
     private PlayGameStoreViewResponse buildResponse(
             PlayGameRow game,
             GameBlind currentBlind,
             GameBlind nextBlind,
-            int remainingSeconds
+            int remainingSeconds,
+            int averageStack
     ) {
 
         return PlayGameStoreViewResponse.builder()
@@ -113,6 +107,8 @@ public class GameProgressCalculator {
                 .startAt(game.getStartAt())
                 .currentLevel(game.getGameLevel())
                 .levelStartAt(game.getLevelStartAt())
+                .levelStopTime(game.getLevelStopTime())
+
                 .levelDurationMinutes(currentBlind.getDuration())
                 .levelRemainingSeconds(remainingSeconds)
 
@@ -123,7 +119,7 @@ public class GameProgressCalculator {
                 .nowPeople(game.getNowPeople())
                 .rebuyinCount(game.getRebuyinCount())
                 .totalStack(game.getTotalStack())
-                .averageStack(game.getAverageStack())
+                .averageStack(averageStack)
                 .build();
     }
 
@@ -136,10 +132,10 @@ public class GameProgressCalculator {
                 .build();
     }
 
-    /* =========================
-       기본 응답 (계산 불가)
-       ========================= */
-    private PlayGameStoreViewResponse baseResponse(PlayGameRow game) {
+    private PlayGameStoreViewResponse baseResponse(
+            PlayGameRow game,
+            int averageStack
+    ) {
         return PlayGameStoreViewResponse.builder()
                 .playGameId(game.getPlayGameId())
                 .storeId(game.getStoreId())
@@ -151,8 +147,7 @@ public class GameProgressCalculator {
                 .nowPeople(game.getNowPeople())
                 .rebuyinCount(game.getRebuyinCount())
                 .totalStack(game.getTotalStack())
-                .averageStack(game.getAverageStack())
+                .averageStack(averageStack)
                 .build();
     }
 }
-

@@ -4,6 +4,7 @@ import com.lapoit.api.domain.GameBlind;
 import com.lapoit.api.dto.playgame.PlayGameRow;
 import com.lapoit.api.mapper.GameBlindMapper;
 import com.lapoit.api.mapper.PlayGameMapper;
+import com.lapoit.api.mapper.UserGameMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -24,9 +25,7 @@ public class PlayGameScheduler {
     @Transactional
     public void advanceLevels() {
 
-        List<PlayGameRow> games =
-                playGameMapper.findStartedGames();
-
+        List<PlayGameRow> games = playGameMapper.findStartedGames();
         LocalDateTime now = LocalDateTime.now();
 
         for (PlayGameRow game : games) {
@@ -41,25 +40,30 @@ public class PlayGameScheduler {
 
             long elapsed =
                     Duration.between(game.getLevelStartAt(), now).getSeconds()
-                            - game.getTotalStopTime();
+                            - game.getLevelStopTime();
 
-            if (elapsed >= blind.getDuration() * 60) {
 
-                GameBlind next =
-                        gameBlindMapper.findByGameIdAndLevel(
-                                game.getGameId(),
-                                game.getGameLevel() + 1
-                        );
+            // ⭕ "이번 레벨 하나만" 초과했는지만 본다
+            if (elapsed < blind.getDuration() * 60) {
+                continue;
+            }
 
-                if (next == null) {
-                    playGameMapper.finishGame(game.getPlayGameId());
-                } else {
-                    playGameMapper.levelUp(
-                            game.getPlayGameId(),
-                            next.getLevel()
+            GameBlind next =
+                    gameBlindMapper.findByGameIdAndLevel(
+                            game.getGameId(),
+                            game.getGameLevel() + 1
                     );
-                }
+
+            if (next == null) {
+                playGameMapper.finishGame(game.getPlayGameId());
+            } else {
+                playGameMapper.levelUp(
+                        game.getPlayGameId(),
+                        game.getGameLevel(),       // currentLevel
+                        next.getLevel()            // nextLevel
+                );
             }
         }
     }
+
 }

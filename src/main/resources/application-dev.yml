@@ -2,6 +2,9 @@ server:
   port: ${SPRING_BACKEND_PORT}
 
 spring:
+  jackson:
+    time-zone: Asia/Seoul
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${SPRING_DATASOURCE_URL_DEV}
@@ -17,7 +20,7 @@ spring:
 
   data:
     redis:
-      host: ${API_BASE_URL2}
+      host: ${API_BASE_URL}
       port: ${REDIS_PORT_DEV}
       password: ${REDIS_PASSWORD}
 
@@ -26,7 +29,7 @@ mybatis:
   type-aliases-package: com.lapoit.domain
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 jwt:
   secret: YmVzdHNlY3JldGtleWluYmFzZTY0ZW5jb2RlZGZvcnNoYTI1Ng==

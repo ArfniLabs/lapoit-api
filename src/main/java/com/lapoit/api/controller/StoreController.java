@@ -1,5 +1,6 @@
 package com.lapoit.api.controller;
 
+import com.lapoit.api.controller.docs.StoreControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.store.StoreCreateRequestDto;
 import com.lapoit.api.dto.store.StoreResponseDto;
@@ -14,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/store")
 @RequiredArgsConstructor
-public class StoreController {
+public class StoreController implements StoreControllerDocs {
 
     private final StoreService storeService;
 

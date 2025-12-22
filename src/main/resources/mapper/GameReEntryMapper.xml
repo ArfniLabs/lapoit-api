@@ -37,4 +37,13 @@
         DELETE FROM game_re_entry WHERE game_id = #{gameId}
     </delete>
 
+    <select id="findByGameIdAndCount" resultType="com.lapoit.api.domain.GameReEntry">
+        SELECT *
+        FROM game_re_entry
+        WHERE game_id = #{gameId}
+        AND re_entry_count = #{count}
+    </select>
+
+
+
 </mapper>

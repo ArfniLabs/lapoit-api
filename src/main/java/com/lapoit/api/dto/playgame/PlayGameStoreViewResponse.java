@@ -20,6 +20,7 @@ public class PlayGameStoreViewResponse {
 
     private Integer currentLevel;
     private LocalDateTime levelStartAt;
+    private Integer levelStopTime;
 
     private Integer levelDurationMinutes;
     private Integer levelRemainingSeconds;

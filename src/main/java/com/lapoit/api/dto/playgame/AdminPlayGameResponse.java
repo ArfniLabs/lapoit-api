@@ -26,7 +26,6 @@ public class AdminPlayGameResponse {
     private Integer rebuyinCount;
 
     private Integer totalStack;
-    private Integer averageStack;
 
     private String gameStatus;
 }

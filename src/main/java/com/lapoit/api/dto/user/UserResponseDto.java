@@ -18,4 +18,5 @@ public class UserResponseDto {
     private String phoneNumber;// USER / ADMIN / SUPERADMIN
     private String code;// ACTIVE / INACTIVE
     private String createAt;
+    private Long point;
 }

@@ -14,8 +14,9 @@ public interface TempUserMapper {
 
     TempUser findByUserId(@Param("userId") String userId);
 
-
     TempUser findByNickname(@Param("userNickname") String userNickname);
+
+    TempUser findByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 
     List<TempUserResponseDto> finTempUsersById(@Param("storeId") Integer storeId);
 

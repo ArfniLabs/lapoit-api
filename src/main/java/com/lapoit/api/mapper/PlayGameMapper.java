@@ -37,11 +37,39 @@ public interface PlayGameMapper {
     /** 레벨 업 */
     void levelUp(
             @Param("playGameId") Long playGameId,
-            @Param("nextLevel") int nextLevel
+            @Param("currentLevel") Integer currentLevel,
+            @Param("nextLevel") Integer nextLevel
     );
 
     /** 게임 종료 */
     void finishGame(@Param("playGameId") Long playGameId);
+
+
+
+    void addStackOnJoin(
+            @Param("playGameId") Long playGameId,
+            @Param("stack") int stack
+    );
+
+
+    void addStack(
+            @Param("playGameId") Long playGameId,
+            @Param("stack") Integer stack
+    );
+    void increaseNowPeople(Long playGameId);
+
+    void increaseRebuyinCount(Long playGameId);
+
+    void subtractStack(
+            @Param("playGameId") Long playGameId,
+            @Param("stack") Integer stack
+    );
+
+    void decreaseRebuyinCount(@Param("playGameId") Long playGameId);
+
+    void decreaseNowPeople(@Param("playGameId") Long playGameId);
+
+    PlayGameRow findById(@Param("playGameId") Long playGameId);
 
 }
 
