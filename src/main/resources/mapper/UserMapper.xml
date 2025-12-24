@@ -150,5 +150,20 @@
     </update>
 
 
+    <update id="addPoint">
+        UPDATE user
+        SET point = point + #{amount}
+        WHERE id = #{userId}
+    </update>
+
+    <update id="subtractPoint">
+        UPDATE user
+        SET point = point - #{amount}
+        WHERE id = #{userId}
+        AND point >= #{amount}
+    </update>
+
+
+
 
 </mapper>

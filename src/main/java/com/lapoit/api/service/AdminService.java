@@ -7,6 +7,7 @@ import com.lapoit.api.domain.UserScore;
 import com.lapoit.api.dto.admin.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
+import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.mapper.TempUserMapper;
 import com.lapoit.api.mapper.UserHistoryMapper;
 import com.lapoit.api.mapper.UserMapper;
@@ -264,6 +265,77 @@ public class AdminService {
         if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
 
         userMapper.updateStatusByUserId(userId, "ACTIVE");
+    }
+
+
+    /** 포인트 생성코드이므로 가장 중요하게 관리해야함 */
+    @Transactional
+    public void mintPoint(Long amount, CustomUserDetails principal) {
+
+        // 1. SUPERADMIN 권한 확인
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
+
+        if (amount <= 0) {
+            throw new CustomException(ErrorCode.INVALID_POINT_AMOUNT);
+        }
+
+        // 2. SUPERADMIN 포인트 증가 (무에서 유)
+        userMapper.addPoint(principal.getUser().getId(), amount);
+
+        // 3. 히스토리 기록 (발행 로그)
+        userHistoryMapper.insert(UserHistory.builder()
+                .userId(principal.getUser().getId())     // 중앙은행 자신
+                .storeId(0L)
+                .pointDelta(amount)
+                .scoreDelta(0L)
+                .actorUserId(principal.getUser().getId())
+                .build());
+    }
+
+
+
+    // 슈퍼관리자 -> 관리자 포인트 지급
+    @Transactional
+    public void givePointToAdmin(Long adminUserId,
+                                 Long amount,
+                                 CustomUserDetails principal) {
+
+        // 1️⃣ SUPERADMIN 권한 확인
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        if (amount <= 0) {
+            throw new CustomException(ErrorCode.INVALID_POINT_AMOUNT);
+        }
+
+        User admin = userMapper.findById(adminUserId);
+        if (admin == null || !"ADMIN".equals(admin.getRole())) {
+            throw new CustomException(ErrorCode.ADMIN_NOT_FOUND);
+        }
+
+        Long superAdminId = principal.getUser().getId();
+
+        // 2️⃣ SUPERADMIN 포인트 차감
+        int updated = userMapper.subtractPoint(superAdminId, amount);
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
+        }
+
+        // 3️⃣ ADMIN 포인트 증가
+        userMapper.addPoint(adminUserId, amount);
+
+        // 4️⃣ 히스토리 기록 (중앙은행 → 시중은행)
+        userHistoryMapper.insert(UserHistory.builder()
+                .userId(adminUserId)          // 포인트 받은 주체
+                .storeId(0L)                  // 슈퍼관리자 포인트 지급 store_id
+                .actorUserId(superAdminId)    // 지급한 주체
+                .pointDelta(amount)
+                .scoreDelta(0L)
+                .build());
+    }
+
 
 }

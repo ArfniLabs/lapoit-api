@@ -9,6 +9,7 @@ import com.lapoit.api.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
@@ -191,5 +192,41 @@ public class AdminController implements AdminControllerDocs {
                 ApiResponseDto.success("Admin-200", "유저 활성화 성공", null)
         );
     }
+
+    // 슈퍼 관리자 포인트 생성
+    @PatchMapping("/points/mint")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> mintPoint(
+            @RequestParam("amount") Long amount,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        adminService.mintPoint(amount, principal);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("POINT-201", "포인트 발행 완료", null)
+        );
+    }
+
+    /** 슈퍼관리자 -> 관리자 포인트 지급 */
+    @PatchMapping("/points")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> givePointToAdmin(
+            @RequestBody GivePointToAdminRequest request,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        adminService.givePointToAdmin(
+                request.getAdminId(),
+                request.getAmount(),
+                principal
+        );
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "POINT-202",
+                        "관리자 포인트 지급 완료",
+                        null
+                )
+        );
+    }
+
 
 }

@@ -54,4 +54,12 @@ public interface  UserMapper {
 
     void activateAdmin(Long id);
 
+
+    /** 포인트 증가 */
+    int addPoint(@Param("userId") Long userId,
+                 @Param("amount") Long amount);
+
+    /** 포인트 차감 (잔액 부족 시 0 row) */
+    int subtractPoint(@Param("userId") Long userId,
+                      @Param("amount") Long amount);
 }
