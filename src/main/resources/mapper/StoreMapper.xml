@@ -46,4 +46,17 @@
         WHERE store_id = #{storeId}
     </delete>
 
+
+    <select id="existsById"
+            parameterType="long"
+            resultType="boolean">
+
+        SELECT EXISTS (
+        SELECT 1
+        FROM store
+        WHERE store_id = #{storeId}
+        )
+
+    </select>
+
 </mapper>

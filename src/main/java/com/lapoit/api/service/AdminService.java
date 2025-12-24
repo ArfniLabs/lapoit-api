@@ -8,10 +8,7 @@ import com.lapoit.api.dto.admin.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.jwt.CustomUserDetails;
-import com.lapoit.api.mapper.TempUserMapper;
-import com.lapoit.api.mapper.UserHistoryMapper;
-import com.lapoit.api.mapper.UserMapper;
-import com.lapoit.api.mapper.UserScoreMapper;
+import com.lapoit.api.mapper.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -34,6 +31,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final UserHistoryMapper userHistoryMapper;
     private final UserScoreMapper  userScoreMapper;
+    private final StoreMapper storeMapper;
 
     @Transactional
     public List<TempUserResponseDto> getPendingUsers(String userId) {
@@ -337,5 +335,36 @@ public class AdminService {
                 .build());
     }
 
+
+
+    // 지점 스코어 초기화
+    @Transactional
+    public void resetStoreScore(Long storeId, CustomUserDetails principal) {
+
+        User admin = principal.getUser();
+        String role = admin.getRole();
+
+        // 1️⃣ USER는 접근 불가
+        if ("USER".equals(role)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        // 2️⃣ ADMIN은 자기 지점만 가능
+        if ("ADMIN".equals(role)) {
+            if (!storeId.equals(admin.getStoreId())) {
+                throw new CustomException(ErrorCode.ACCESS_DENIED);
+            }
+        }
+
+        // 3️⃣ SUPERADMIN은 모든 지점 가능 (검증 스킵)
+
+        // 4️⃣ 지점 존재 확인
+        if (!storeMapper.existsById(storeId)) {
+            throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        // 5️⃣ 승점 초기화
+        userScoreMapper.resetScoreByStoreId(storeId);
+    }
 
 }

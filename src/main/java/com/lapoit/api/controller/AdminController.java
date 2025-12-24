@@ -229,4 +229,21 @@ public class AdminController implements AdminControllerDocs {
     }
 
 
+    @PatchMapping("/store/{storeId}/score/reset")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+
+    public ResponseEntity<?> resetStoreScore(
+            @PathVariable("storeId") Long storeId,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        adminService.resetStoreScore(storeId, principal);
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "SCORE-200",
+                        "지점 승점이 초기화되었습니다.",
+                        null
+                )
+        );
+    }
+
 }

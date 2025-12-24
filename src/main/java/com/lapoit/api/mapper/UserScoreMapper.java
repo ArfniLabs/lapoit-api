@@ -20,4 +20,8 @@ public interface UserScoreMapper {
                          @Param("storeId") Long storeId);
 
     int deleteByUserId(@Param("userId") Long userId);
+
+
+    /** 특정 지점 승점 전체 초기화 */
+    int resetScoreByStoreId(@Param("storeId") Long storeId);
 }
