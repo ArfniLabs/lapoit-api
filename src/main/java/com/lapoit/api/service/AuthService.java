@@ -6,6 +6,7 @@ import com.lapoit.api.domain.User;
 import com.lapoit.api.dto.auth.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
+import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.jwt.JwtTokenProvider;
 import com.lapoit.api.mapper.TempUserMapper;
 import com.lapoit.api.mapper.UserMapper;
@@ -187,4 +188,83 @@ public class AuthService {
 
 
     }
+
+    @Transactional
+    public void createAdmin(AdminCreateRequestDto requestDto,
+                            CustomUserDetails principal) {
+
+        // 1️⃣ SUPERADMIN 권한 체크
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        // 2️⃣ 아이디 중복 체크
+        if (userMapper.findByUserId(requestDto.getUserId()) != null ||
+                tempUserMapper.findByUserId(requestDto.getUserId()) != null) {
+            throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
+        }
+
+        // 3️⃣ ADMIN 계정 생성
+        User admin = User.builder()
+                .userId(requestDto.getUserId())
+                .userPw(passwordEncoder.encode(requestDto.getPassword()))
+                .userName(requestDto.getUserName())
+                .userNickname(requestDto.getUserNickname())
+                .storeId(requestDto.getStoreId())
+                .phoneNumber(requestDto.getPhoneNumber())
+                .role("ADMIN")
+                .status("ACTIVE") // 관리자는 즉시 활성
+                .point(0L)
+                .code(null)
+                .build();
+        userMapper.save(admin);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<User> getAdmins(CustomUserDetails principal) {
+
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        return userMapper.findAdmins();
+    }
+
+    @Transactional
+    public void deleteAdmin(Long adminId, CustomUserDetails principal) {
+
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        User admin = userMapper.findById(adminId);
+        if (admin == null || !"ADMIN".equals(admin.getRole())) {
+            throw new CustomException(ErrorCode.ADMIN_NOT_FOUND);
+        }
+
+        userMapper.deactivateAdmin(adminId);
+    }
+
+
+    @Transactional
+    public void activateAdmin(Long adminId, CustomUserDetails principal) {
+
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        User admin = userMapper.findById(adminId);
+        if (admin == null || !"ADMIN".equals(admin.getRole())) {
+            throw new CustomException(ErrorCode.ADMIN_NOT_FOUND);
+        }
+
+        if ("ACTIVE".equals(admin.getStatus())) {
+            throw new CustomException(ErrorCode.ADMIN_ALREADY_ACTIVE);
+        }
+
+        userMapper.activateAdmin(adminId);
+    }
+
+
 }

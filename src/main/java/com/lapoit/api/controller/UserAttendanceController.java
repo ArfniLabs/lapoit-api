@@ -14,6 +14,7 @@ public class UserAttendanceController implements UserAttendanceControllerDocs {
 
     private final AttendanceService attendanceService;
 
+    /** 해당 연도/월의 출석 현황확인*/
     @GetMapping("/{userId}/attendance")
     public ResponseEntity<ApiResponseDto<?>> getUserAttendance(
             @PathVariable("userId") Long userId,

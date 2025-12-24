@@ -124,4 +124,31 @@
         WHERE id = #{id}
     </delete>
 
+
+    <select id="findAdmins" resultType="com.lapoit.api.domain.User">
+        SELECT *
+        FROM user
+        WHERE role = 'ADMIN'
+        AND status != 'INACTIVE'
+    </select>
+
+
+    <update id="deactivateAdmin">
+        UPDATE user
+        SET status = 'INACTIVE',
+        update_at = NOW()
+        WHERE id = #{id}
+        AND role = 'ADMIN'
+    </update>
+
+    <update id="activateAdmin">
+        UPDATE user
+        SET status = 'ACTIVE',
+        update_at = NOW()
+        WHERE id = #{id}
+        AND role = 'ADMIN'
+    </update>
+
+
+
 </mapper>

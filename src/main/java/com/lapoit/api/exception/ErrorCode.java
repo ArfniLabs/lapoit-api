@@ -15,7 +15,9 @@ public enum ErrorCode {
     PHONE_NUMBER_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-4093", "이미 사용 중인 전화번호입니다."),
     USER_INFO_MISMATCH_NAME(HttpStatus.BAD_REQUEST, "USER-407", "이름 정보가 일치하지 않습니다."),
     USER_INFO_MISMATCH_NUMBER(HttpStatus.BAD_REQUEST, "USER-408", "전화번호 정보가 일치하지 않습니다."),
-
+    ACCESS_DENIED(HttpStatus.BAD_REQUEST, "USER-409", "관리자 계정 생성에 접근할수없습니다."),
+    ADMIN_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER-410", "해당 관리자가 존재하지 않습니다."),
+    ADMIN_ALREADY_ACTIVE(HttpStatus.BAD_REQUEST, "USER-411", "이미 활성화된 관리자입니다."),
 
     // 인증/인가
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH-401", "인증이 필요합니다."),

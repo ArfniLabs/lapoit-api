@@ -1,6 +1,7 @@
 package com.lapoit.api.mapper;
 
 import com.lapoit.api.domain.User;
+import com.lapoit.api.dto.auth.AdminUpdateRequestDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -46,4 +47,11 @@ public interface  UserMapper {
     int updateStatusByUserId(@Param("userId") String userId, @Param("status") String status);
 
     int deleteById(@Param("id") Long id);
+
+    List<User> findAdmins();
+
+    void deactivateAdmin(Long id);
+
+    void activateAdmin(Long id);
+
 }
