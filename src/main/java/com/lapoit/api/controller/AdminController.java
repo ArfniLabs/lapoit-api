@@ -124,10 +124,11 @@ public class AdminController implements AdminControllerDocs {
 
     //특정 회원 포인트 변경
     @PatchMapping("/users/{userId}/point")
-    public ResponseEntity<?> updateUserPoint(        @PathVariable String userId,
+    public ResponseEntity<?> updateUserPoint(    @AuthenticationPrincipal CustomUserDetails principal,
+                                                    @PathVariable String userId,
                                                      @RequestBody UpdateUserPointRequest request){
-
-        adminService.updateUserPoint(userId,request);
+        String adminId=principal.getUsername();
+        adminService.updateUserPoint(adminId,userId,request);
         return ResponseEntity.ok(
                 ApiResponseDto.success("Admin-200", "회원 포인트 변경 성공", null)
         );
@@ -135,10 +136,12 @@ public class AdminController implements AdminControllerDocs {
     }
     //특정 회원 승점 지급/변경
     @PatchMapping("/users/{userId}/score")
-    public ResponseEntity<?> updateUserScore(        @PathVariable String userId,
-                                                     @RequestBody UpdateUserScoreRequest request){
+    public ResponseEntity<?> updateUserScore(@AuthenticationPrincipal CustomUserDetails principal,
+                                             @PathVariable String userId,
+                                             @RequestBody UpdateUserScoreRequest request){
 
-        adminService.updateUserScore(userId,request);
+        String adminId=principal.getUsername();
+        adminService.updateUserScore(adminId,userId,request);
         return ResponseEntity.ok(
                 ApiResponseDto.success("Admin-200", "회원 승점 변경 성공", null)
         );

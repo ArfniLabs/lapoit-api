@@ -147,13 +147,18 @@ public class AdminService {
     }
 
     @Transactional
-    public void updateUserPoint(String userId, UpdateUserPointRequest request) {
+    public void updateUserPoint(String adminId,String userId, UpdateUserPointRequest request) {
         User user = userMapper.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
-
+        User admin=userMapper.findByUserId(adminId);
+        if (admin == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
 
         long delta = request.getPoint(); // +면 적립, -면 차감
 
+        int adminUpdated = userMapper.updateUserPointDelta(adminId, -delta);
+        if (adminUpdated == 0) {
+            throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
+        }
 
         int updated = userMapper.updateUserPointDelta(userId, delta); // 성공하면 1
         if (updated == 0) {
@@ -161,19 +166,32 @@ public class AdminService {
             throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
         }
 
-        // 히스토리 기록 (store_id는 user에 있으니 가져와서 넣기)
+
+
+        // 히스토리 기록 (store_id는 user에 있으니 가져와서 넣기) ( 유저쪽)
         userHistoryMapper.insert(UserHistory.builder()
                 .userId(user.getId())          // PK id
                 .storeId(0L) //점수는 0으로 고정 하여 조회 할수 있도록 한다.
                 .scoreDelta(0L)
                 .pointDelta(delta)
+                .actorUserId(admin.getId())
+                .build());
+
+        //어드민쪽
+        userHistoryMapper.insert(UserHistory.builder()
+                .userId(admin.getId())          // PK id
+                .storeId(0L) //점수는 0으로 고정 하여 조회 할수 있도록 한다.
+                .scoreDelta(0L)
+                .pointDelta(-delta)
+                .actorUserId(user.getId())
                 .build());
     }
 
     @Transactional
-    public void updateUserScore(String userId, UpdateUserScoreRequest request) {
+    public void updateUserScore(String adminId,String userId, UpdateUserScoreRequest request) {
         User user = userMapper.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        User admin=userMapper.findByUserId(adminId);
 
         //지점 확인
         UserScore score =userScoreMapper.findByUserIdAndStoreId(user.getId(),request.getStoreId());
@@ -198,11 +216,13 @@ public class AdminService {
 
         Long delta = (long) request.getScore();
 
+
         userHistoryMapper.insert(UserHistory.builder()
                 .userId(user.getId())
                 .storeId(request.getStoreId())
                 .scoreDelta(delta)
                 .pointDelta(0L)
+                .actorUserId(admin.getId())
                 .build());
     }
 

@@ -111,14 +111,16 @@ public interface AdminControllerDocs {
 
     @Operation(
             summary = "Update user point",
-            description = "Update a user's point balance.",
+            description = "Update a user's point balance and deduct the same amount from the admin's point.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User point updated"),
+            @ApiResponse(responseCode = "400", description = "Admin point not enough"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     ResponseEntity<?> updateUserPoint(
+            @Parameter(hidden = true) CustomUserDetails principal,
             @Parameter(description = "User ID") String userId,
             UpdateUserPointRequest request
     );
@@ -133,13 +135,14 @@ public interface AdminControllerDocs {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     ResponseEntity<?> updateUserScore(
+            @Parameter(hidden = true) CustomUserDetails principal,
             @Parameter(description = "User ID") String userId,
             UpdateUserScoreRequest request
     );
 
     @Operation(
             summary = "Get user history",
-            description = "Return score history for a user.",
+            description = "Return score history for a user, including actor user identifiers.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
     @ApiResponses({
@@ -165,4 +168,15 @@ public interface AdminControllerDocs {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     ResponseEntity<?> deactivateUser(@Parameter(description = "User ID") String userId);
+
+    @Operation(
+            summary = "Activate user",
+            description = "Update a user's status to ACTIVE.",
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User activated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    ResponseEntity<?> activateUser(@Parameter(description = "User ID") String userId);
 }

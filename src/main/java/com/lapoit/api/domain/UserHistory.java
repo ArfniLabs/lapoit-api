@@ -20,5 +20,6 @@ public class UserHistory {
     private Long scoreDelta; // score_delta (변동량)
     private Long pointDelta;    // point_delta (변동량)
 
+    private Long actorUserId;// 관리자 아이디
     private LocalDateTime createdAt; // created_at
 }
