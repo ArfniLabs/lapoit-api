@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.RankingMapper">
+
+    <select id="findStoreRanking"
+            resultType="com.lapoit.api.dto.rank.StoreRankingItem">
+
+        SELECT
+        RANK() OVER (ORDER BY us.score DESC) AS `rank`,
+        u.id AS userId,
+        u.user_nickname AS nickname,
+        us.score AS score
+        FROM user_score us
+        JOIN user u
+        ON us.user_id = u.id
+        WHERE us.store_id = #{storeId}
+        AND us.score >= 1
+        ORDER BY us.score DESC
+
+    </select>
+
+</mapper>

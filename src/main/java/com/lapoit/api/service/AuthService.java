@@ -1,16 +1,23 @@
 package com.lapoit.api.service;
 
 
+import com.lapoit.api.domain.Store;
 import com.lapoit.api.domain.TempUser;
 import com.lapoit.api.domain.User;
+import com.lapoit.api.domain.UserScore;
 import com.lapoit.api.dto.auth.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
+import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.jwt.JwtTokenProvider;
+import com.lapoit.api.mapper.StoreMapper;
 import com.lapoit.api.mapper.TempUserMapper;
 import com.lapoit.api.mapper.UserMapper;
+import com.lapoit.api.mapper.UserScoreMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,6 +38,8 @@ public class AuthService {
     private final TempUserMapper tempUserMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final StoreMapper storeMapper;
+    private final UserScoreMapper userScoreMapper;
 
     private void checkExistenceAndThrow(Object existing, Object existingTemp, ErrorCode errorCode) {
         if (existing != null || existingTemp != null) {
@@ -65,6 +74,7 @@ public class AuthService {
         tempUserMapper.save(user);
     }
 
+    @Transactional
     public TokenResponseDto login(LoginRequestDto requestDto){
         //유저조회
         User user=userMapper.findByUserId(requestDto.getUserId());
@@ -86,6 +96,31 @@ public class AuthService {
             throw new CustomException(ErrorCode.ACCOUNT_DISABLED);
         }
 
+        //지점 목록 하고 지점 스코어 테이블 생성 비교 정합성 비교 절차
+        List<Store> stores = storeMapper.findAll();
+
+        for (Store store : stores) {
+            //현재 유저가 그지역 테이블이 이미 있는지 확인 절차
+            UserScore score =userScoreMapper.findByUserIdAndStoreId(user.getId(),store.getStoreId());
+
+            if(score==null && store.getStoreId()!=0){
+                UserScore newScore = UserScore.builder()
+                        .userId(user.getId())
+                        .storeId(store.getStoreId())
+                        .score(0)
+                        .build();
+
+                try {
+                    userScoreMapper.save(newScore);
+                } catch (DuplicateKeyException e) {
+                    throw new CustomException(ErrorCode.SCORE_ALREADY_EXISTS);
+                }catch (DataIntegrityViolationException e){
+                    throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+                }
+            }
+
+        }
+
 
         // 4) JWT 발급
         String accessToken = jwtTokenProvider.createAccessToken(user.getUserId(), user.getRole());
@@ -101,6 +136,8 @@ public class AuthService {
                 refreshTtlMillis,
                 TimeUnit.MILLISECONDS
         );
+
+
 
         return TokenResponseDto.of(accessToken, refreshToken, accessTokenValidity);
     }
@@ -187,4 +224,83 @@ public class AuthService {
 
 
     }
+
+    @Transactional
+    public void createAdmin(AdminCreateRequestDto requestDto,
+                            CustomUserDetails principal) {
+
+        // 1️⃣ SUPERADMIN 권한 체크
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        // 2️⃣ 아이디 중복 체크
+        if (userMapper.findByUserId(requestDto.getUserId()) != null ||
+                tempUserMapper.findByUserId(requestDto.getUserId()) != null) {
+            throw new CustomException(ErrorCode.ID_ALREADY_EXISTS);
+        }
+
+        // 3️⃣ ADMIN 계정 생성
+        User admin = User.builder()
+                .userId(requestDto.getUserId())
+                .userPw(passwordEncoder.encode(requestDto.getPassword()))
+                .userName(requestDto.getUserName())
+                .userNickname(requestDto.getUserNickname())
+                .storeId(requestDto.getStoreId())
+                .phoneNumber(requestDto.getPhoneNumber())
+                .role("ADMIN")
+                .status("ACTIVE") // 관리자는 즉시 활성
+                .point(0L)
+                .code(null)
+                .build();
+        userMapper.save(admin);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<User> getAdmins(CustomUserDetails principal) {
+
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        return userMapper.findAdmins();
+    }
+
+    @Transactional
+    public void deleteAdmin(Long adminId, CustomUserDetails principal) {
+
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        User admin = userMapper.findById(adminId);
+        if (admin == null || !"ADMIN".equals(admin.getRole())) {
+            throw new CustomException(ErrorCode.ADMIN_NOT_FOUND);
+        }
+
+        userMapper.deactivateAdmin(adminId);
+    }
+
+
+    @Transactional
+    public void activateAdmin(Long adminId, CustomUserDetails principal) {
+
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        User admin = userMapper.findById(adminId);
+        if (admin == null || !"ADMIN".equals(admin.getRole())) {
+            throw new CustomException(ErrorCode.ADMIN_NOT_FOUND);
+        }
+
+        if ("ACTIVE".equals(admin.getStatus())) {
+            throw new CustomException(ErrorCode.ADMIN_ALREADY_ACTIVE);
+        }
+
+        userMapper.activateAdmin(adminId);
+    }
+
+
 }

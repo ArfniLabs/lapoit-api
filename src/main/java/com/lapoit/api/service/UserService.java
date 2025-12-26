@@ -3,17 +3,15 @@ package com.lapoit.api.service;
 import com.lapoit.api.domain.User;
 import com.lapoit.api.domain.UserHistory;
 import com.lapoit.api.domain.UserScore;
+import com.lapoit.api.dto.rank.StoreRankingItem;
+import com.lapoit.api.dto.rank.StoreRankingResponse;
 import com.lapoit.api.dto.user.CreateStoreRequestDto;
 import com.lapoit.api.dto.user.HistoryResponse;
 import com.lapoit.api.dto.user.UpdateProfileRequestDto;
 import com.lapoit.api.dto.user.UserResponseDto;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
-import com.lapoit.api.mapper.TempUserMapper;
-import com.lapoit.api.mapper.UserGameMapper;
-import com.lapoit.api.mapper.UserHistoryMapper;
-import com.lapoit.api.mapper.UserMapper;
-import com.lapoit.api.mapper.UserScoreMapper;
+import com.lapoit.api.mapper.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -34,6 +32,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserHistoryMapper userHistoryMapper;
     private final UserGameMapper userGameMapper;
+    private final RankingMapper rankingMapper;
+    private final StoreMapper storeMapper;
 
     public UserResponseDto getMyInfo(String userId) {
         User user= userMapper.findByUserId(userId);
@@ -170,5 +170,25 @@ public class UserService {
         tempUserMapper.deleteByUserId(userId);
         userMapper.deleteById(id);
     }
+
+
+
+    @Transactional(readOnly = true)
+    public StoreRankingResponse getStoreRanking(Long storeId) {
+
+        if (!storeMapper.existsById(storeId)) {
+            throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        List<StoreRankingItem> rankings =
+                rankingMapper.findStoreRanking(storeId);
+
+        if (rankings.isEmpty()) {
+            throw new CustomException(ErrorCode.RANKING_NOT_FOUND);
+        }
+
+        return new StoreRankingResponse(storeId, rankings);
+    }
+
 }
 

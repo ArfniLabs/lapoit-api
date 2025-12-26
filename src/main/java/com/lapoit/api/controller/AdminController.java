@@ -9,6 +9,7 @@ import com.lapoit.api.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
@@ -124,10 +125,11 @@ public class AdminController implements AdminControllerDocs {
 
     //특정 회원 포인트 변경
     @PatchMapping("/users/{userId}/point")
-    public ResponseEntity<?> updateUserPoint(        @PathVariable String userId,
+    public ResponseEntity<?> updateUserPoint(    @AuthenticationPrincipal CustomUserDetails principal,
+                                                    @PathVariable String userId,
                                                      @RequestBody UpdateUserPointRequest request){
-
-        adminService.updateUserPoint(userId,request);
+        String adminId=principal.getUsername();
+        adminService.updateUserPoint(adminId,userId,request);
         return ResponseEntity.ok(
                 ApiResponseDto.success("Admin-200", "회원 포인트 변경 성공", null)
         );
@@ -135,10 +137,12 @@ public class AdminController implements AdminControllerDocs {
     }
     //특정 회원 승점 지급/변경
     @PatchMapping("/users/{userId}/score")
-    public ResponseEntity<?> updateUserScore(        @PathVariable String userId,
-                                                     @RequestBody UpdateUserScoreRequest request){
+    public ResponseEntity<?> updateUserScore(@AuthenticationPrincipal CustomUserDetails principal,
+                                             @PathVariable String userId,
+                                             @RequestBody UpdateUserScoreRequest request){
 
-        adminService.updateUserScore(userId,request);
+        String adminId=principal.getUsername();
+        adminService.updateUserScore(adminId,userId,request);
         return ResponseEntity.ok(
                 ApiResponseDto.success("Admin-200", "회원 승점 변경 성공", null)
         );
@@ -186,6 +190,59 @@ public class AdminController implements AdminControllerDocs {
 
         return ResponseEntity.ok(
                 ApiResponseDto.success("Admin-200", "유저 활성화 성공", null)
+        );
+    }
+
+    // 슈퍼 관리자 포인트 생성
+    @PatchMapping("/points/mint")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> mintPoint(
+            @RequestParam("amount") Long amount,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        adminService.mintPoint(amount, principal);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("POINT-201", "포인트 발행 완료", null)
+        );
+    }
+
+    /** 슈퍼관리자 -> 관리자 포인트 지급 */
+    @PatchMapping("/points")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> givePointToAdmin(
+            @RequestBody GivePointToAdminRequest request,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        adminService.givePointToAdmin(
+                request.getAdminId(),
+                request.getAmount(),
+                principal
+        );
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "POINT-202",
+                        "관리자 포인트 지급 완료",
+                        null
+                )
+        );
+    }
+
+
+    @PatchMapping("/store/{storeId}/score/reset")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+
+    public ResponseEntity<?> resetStoreScore(
+            @PathVariable("storeId") Long storeId,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        adminService.resetStoreScore(storeId, principal);
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "SCORE-200",
+                        "지점 승점이 초기화되었습니다.",
+                        null
+                )
         );
     }
 

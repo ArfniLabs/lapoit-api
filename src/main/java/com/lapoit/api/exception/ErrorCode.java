@@ -15,7 +15,10 @@ public enum ErrorCode {
     PHONE_NUMBER_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-4093", "이미 사용 중인 전화번호입니다."),
     USER_INFO_MISMATCH_NAME(HttpStatus.BAD_REQUEST, "USER-407", "이름 정보가 일치하지 않습니다."),
     USER_INFO_MISMATCH_NUMBER(HttpStatus.BAD_REQUEST, "USER-408", "전화번호 정보가 일치하지 않습니다."),
-
+    ACCESS_DENIED(HttpStatus.BAD_REQUEST, "USER-409", "관리자 계정 생성에 접근할수없습니다."),
+    ADMIN_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER-410", "해당 관리자가 존재하지 않습니다."),
+    ADMIN_ALREADY_ACTIVE(HttpStatus.BAD_REQUEST, "USER-411", "이미 활성화된 관리자입니다."),
+    INVALID_POINT_AMOUNT(HttpStatus.BAD_REQUEST, "USER-412", "포인트 생성 금액이 음수입니다."),
 
     // 인증/인가
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH-401", "인증이 필요합니다."),
@@ -53,7 +56,8 @@ public enum ErrorCode {
     SCORE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCORE-404", "해당 스코어 테이블이 존재하지 않습니다."),
     SCORE_ALREADY_EXISTS(HttpStatus.CONFLICT, "SCORE-409", "해당 스코어 테이블이 이미 존재합니다."),
     POINT_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"POINT-400","포인트가 부족합니다." ),
-    SCORE_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"SCORE-400","승점이 부족합니다.");
+    RANKING_NOT_FOUND(HttpStatus.BAD_REQUEST,"POINT-401","랭킹을 찾을수 없습니다." ),
+    SCORE_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"SCORE-402","승점이 부족합니다.");
 
 
     private final HttpStatus status;

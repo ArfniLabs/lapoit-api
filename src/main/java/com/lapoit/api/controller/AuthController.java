@@ -8,13 +8,9 @@ import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 // 로그인/ 회원가입/ 토큰발급/ 로그아웃
 
@@ -33,6 +29,61 @@ public class AuthController implements AuthControllerDocs {
         );
 
     }
+
+    /** 슈퍼관리자 -> 관리자 계정 생성 */
+    @PostMapping("/admin/signup")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> createAdmin(
+            @RequestBody AdminCreateRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        authService.createAdmin(request, principal);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("Auth-201", "관리자 계정 생성 완료", request)
+        );
+    }
+
+    /** 슈퍼관리자 -> 관리자 계정 조회 */
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> getAdmins(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "ADMIN-200",
+                        "관리자 목록 조회 성공",
+                        authService.getAdmins(principal)
+                )
+        );
+    }
+
+    /** 슈퍼관리자 -> 관리자 계정 비활성화 */
+    @PatchMapping("/admin/{adminId}")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> deleteAdmin(
+            @PathVariable("adminId") Long adminId,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        authService.deleteAdmin(adminId, principal);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("ADMIN-204", "관리자 비활성화 완료", null)
+        );
+    }
+
+    /** 슈퍼관리자 -> 관리자 계정 재활성화 */
+    @PatchMapping("/admin/{adminId}/activate")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> activateAdmin(
+            @PathVariable("adminId") Long adminId,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        authService.activateAdmin(adminId, principal);
+        return ResponseEntity.ok(
+                ApiResponseDto.success("ADMIN-203", "관리자 재활성화 완료", null)
+        );
+    }
+
 
     //아이디중복 (temp 와 user 에서 모두 중복처리된거거처야함
     @GetMapping("/check-id")

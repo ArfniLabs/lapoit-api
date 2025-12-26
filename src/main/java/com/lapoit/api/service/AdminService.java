@@ -7,10 +7,8 @@ import com.lapoit.api.domain.UserScore;
 import com.lapoit.api.dto.admin.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
-import com.lapoit.api.mapper.TempUserMapper;
-import com.lapoit.api.mapper.UserHistoryMapper;
-import com.lapoit.api.mapper.UserMapper;
-import com.lapoit.api.mapper.UserScoreMapper;
+import com.lapoit.api.jwt.CustomUserDetails;
+import com.lapoit.api.mapper.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -33,6 +31,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final UserHistoryMapper userHistoryMapper;
     private final UserScoreMapper  userScoreMapper;
+    private final StoreMapper storeMapper;
 
     @Transactional
     public List<TempUserResponseDto> getPendingUsers(String userId) {
@@ -147,13 +146,18 @@ public class AdminService {
     }
 
     @Transactional
-    public void updateUserPoint(String userId, UpdateUserPointRequest request) {
+    public void updateUserPoint(String adminId,String userId, UpdateUserPointRequest request) {
         User user = userMapper.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
-
+        User admin=userMapper.findByUserId(adminId);
+        if (admin == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
 
         long delta = request.getPoint(); // +면 적립, -면 차감
 
+        int adminUpdated = userMapper.updateUserPointDelta(adminId, -delta);
+        if (adminUpdated == 0) {
+            throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
+        }
 
         int updated = userMapper.updateUserPointDelta(userId, delta); // 성공하면 1
         if (updated == 0) {
@@ -161,19 +165,32 @@ public class AdminService {
             throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
         }
 
-        // 히스토리 기록 (store_id는 user에 있으니 가져와서 넣기)
+
+
+        // 히스토리 기록 (store_id는 user에 있으니 가져와서 넣기) ( 유저쪽)
         userHistoryMapper.insert(UserHistory.builder()
                 .userId(user.getId())          // PK id
                 .storeId(0L) //점수는 0으로 고정 하여 조회 할수 있도록 한다.
                 .scoreDelta(0L)
                 .pointDelta(delta)
+                .actorUserId(admin.getId())
+                .build());
+
+        //어드민쪽
+        userHistoryMapper.insert(UserHistory.builder()
+                .userId(admin.getId())          // PK id
+                .storeId(0L) //점수는 0으로 고정 하여 조회 할수 있도록 한다.
+                .scoreDelta(0L)
+                .pointDelta(-delta)
+                .actorUserId(user.getId())
                 .build());
     }
 
     @Transactional
-    public void updateUserScore(String userId, UpdateUserScoreRequest request) {
+    public void updateUserScore(String adminId,String userId, UpdateUserScoreRequest request) {
         User user = userMapper.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        User admin=userMapper.findByUserId(adminId);
 
         //지점 확인
         UserScore score =userScoreMapper.findByUserIdAndStoreId(user.getId(),request.getStoreId());
@@ -198,11 +215,13 @@ public class AdminService {
 
         Long delta = (long) request.getScore();
 
+
         userHistoryMapper.insert(UserHistory.builder()
                 .userId(user.getId())
                 .storeId(request.getStoreId())
                 .scoreDelta(delta)
                 .pointDelta(0L)
+                .actorUserId(admin.getId())
                 .build());
     }
 
@@ -244,6 +263,108 @@ public class AdminService {
         if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
 
         userMapper.updateStatusByUserId(userId, "ACTIVE");
+    }
+
+
+    /** 포인트 생성코드이므로 가장 중요하게 관리해야함 */
+    @Transactional
+    public void mintPoint(Long amount, CustomUserDetails principal) {
+
+        // 1. SUPERADMIN 권한 확인
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
+
+        if (amount <= 0) {
+            throw new CustomException(ErrorCode.INVALID_POINT_AMOUNT);
+        }
+
+        // 2. SUPERADMIN 포인트 증가 (무에서 유)
+        userMapper.addPoint(principal.getUser().getId(), amount);
+
+        // 3. 히스토리 기록 (발행 로그)
+        userHistoryMapper.insert(UserHistory.builder()
+                .userId(principal.getUser().getId())     // 중앙은행 자신
+                .storeId(0L)
+                .pointDelta(amount)
+                .scoreDelta(0L)
+                .actorUserId(principal.getUser().getId())
+                .build());
+    }
+
+
+
+    // 슈퍼관리자 -> 관리자 포인트 지급
+    @Transactional
+    public void givePointToAdmin(Long adminUserId,
+                                 Long amount,
+                                 CustomUserDetails principal) {
+
+        // 1️⃣ SUPERADMIN 권한 확인
+        if (!"SUPERADMIN".equals(principal.getUser().getRole())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        if (amount <= 0) {
+            throw new CustomException(ErrorCode.INVALID_POINT_AMOUNT);
+        }
+
+        User admin = userMapper.findById(adminUserId);
+        if (admin == null || !"ADMIN".equals(admin.getRole())) {
+            throw new CustomException(ErrorCode.ADMIN_NOT_FOUND);
+        }
+
+        Long superAdminId = principal.getUser().getId();
+
+        // 2️⃣ SUPERADMIN 포인트 차감
+        int updated = userMapper.subtractPoint(superAdminId, amount);
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
+        }
+
+        // 3️⃣ ADMIN 포인트 증가
+        userMapper.addPoint(adminUserId, amount);
+
+        // 4️⃣ 히스토리 기록 (중앙은행 → 시중은행)
+        userHistoryMapper.insert(UserHistory.builder()
+                .userId(adminUserId)          // 포인트 받은 주체
+                .storeId(0L)                  // 슈퍼관리자 포인트 지급 store_id
+                .actorUserId(superAdminId)    // 지급한 주체
+                .pointDelta(amount)
+                .scoreDelta(0L)
+                .build());
+    }
+
+
+
+    // 지점 스코어 초기화
+    @Transactional
+    public void resetStoreScore(Long storeId, CustomUserDetails principal) {
+
+        User admin = principal.getUser();
+        String role = admin.getRole();
+
+        // 1️⃣ USER는 접근 불가
+        if ("USER".equals(role)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        // 2️⃣ ADMIN은 자기 지점만 가능
+        if ("ADMIN".equals(role)) {
+            if (!storeId.equals(admin.getStoreId())) {
+                throw new CustomException(ErrorCode.ACCESS_DENIED);
+            }
+        }
+
+        // 3️⃣ SUPERADMIN은 모든 지점 가능 (검증 스킵)
+
+        // 4️⃣ 지점 존재 확인
+        if (!storeMapper.existsById(storeId)) {
+            throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        // 5️⃣ 승점 초기화
+        userScoreMapper.resetScoreByStoreId(storeId);
+    }
 
 }

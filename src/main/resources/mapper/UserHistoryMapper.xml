@@ -16,6 +16,7 @@
 
         <result property="scoreDelta" column="score_delta"/>
         <result property="pointDelta" column="point_delta"/>
+        <result property="actorUserId" column="actor_user_id"/>
 
         <result property="createdAt" column="created_at"/>
 
@@ -58,12 +59,14 @@
         store_id,
         score_delta,
         point_delta,
+        actor_user_id,
         created_at
         ) VALUES (
         #{userId},
         #{storeId},
         #{scoreDelta},
         #{pointDelta},
+        #{actorUserId},
         NOW()
         )
     </insert>

@@ -92,7 +92,7 @@ public interface UserControllerDocs {
 
     @Operation(
             summary = "Get my history",
-            description = "Return score history for the authenticated user.",
+            description = "Return score history for the authenticated user, including actor user identifiers.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
     @ApiResponses({

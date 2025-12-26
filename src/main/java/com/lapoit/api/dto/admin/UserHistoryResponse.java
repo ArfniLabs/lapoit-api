@@ -21,7 +21,7 @@ public class UserHistoryResponse {
 
     private Long scoreDelta;
     private Long pointDelta;
-
+    private Long actorUserId;
     private LocalDateTime createdAt;
 
     public static UserHistoryResponse from(UserHistory history) {
@@ -32,6 +32,7 @@ public class UserHistoryResponse {
                 .scoreDelta(history.getScoreDelta())
                 .pointDelta(history.getPointDelta())
                 .createdAt(history.getCreatedAt())
+                .actorUserId(history.getActorUserId())
                 .build();
     }
 

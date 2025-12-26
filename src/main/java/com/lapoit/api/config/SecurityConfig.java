@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/logout").authenticated()
                         .requestMatchers("/api/v1/user/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").authenticated()
+                        //hasAuthority("ADMIN")
                         .requestMatchers("/api/**").authenticated()
                         // 나머지는 일단 허용(필요하면 .authenticated() 로 바꿔도 됨)
                         .anyRequest().permitAll()

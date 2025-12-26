@@ -3,6 +3,7 @@ package com.lapoit.api.controller;
 import com.lapoit.api.controller.docs.UserControllerDocs;
 import com.lapoit.api.domain.UserScore;
 import com.lapoit.api.dto.ApiResponseDto;
+import com.lapoit.api.dto.rank.StoreRankingResponse;
 import com.lapoit.api.dto.user.*;
 import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.service.UserService;
@@ -123,6 +124,25 @@ public class UserController implements UserControllerDocs {
 
         return ResponseEntity.ok(
                 ApiResponseDto.success("USER-200", "탈퇴 성공", null)
+        );
+    }
+
+
+
+    // 지점별 월간 랭킹 조회
+    @GetMapping("/store/{storeId}/ranking")
+    public ResponseEntity<?> getStoreRanking(
+            @PathVariable("storeId") Long storeId
+    ) {
+        StoreRankingResponse response =
+                userService.getStoreRanking(storeId);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "RANK-200",
+                        "승점 랭킹을 조회했습니다.",
+                        response
+                )
         );
     }
 
