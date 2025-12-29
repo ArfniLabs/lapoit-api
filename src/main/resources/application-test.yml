@@ -1,0 +1,13 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  task:
+    scheduling:
+      enabled: false
+
+jwt:
+  secret: YmVzdHNlY3JldGtleWluYmFzZTY0ZW5jb2RlZGZvcnNoYTI1Ng==
+  access-token-validity: 1800000
+  refresh-token-validity: 604800000

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.LoginHistoryMapper">
+
+    <!-- 로그인 성공 시 기록 -->
+    <insert id="insertLoginHistory">
+        INSERT INTO login_history (user_id, login_at)
+        VALUES (#{userId}, NOW())
+    </insert>
+
+    <!-- 오늘 접속자 수(DAU) / 특정 구간 유니크 유저 수 -->
+    <select id="countDistinctUsersBetween" resultType="long">
+        SELECT COUNT(DISTINCT user_id)
+        FROM login_history
+        WHERE login_at <![CDATA[>=]]> #{start}
+          AND login_at <![CDATA[<]]> #{end}
+    </select>
+
+    <select id="countDailyDistinctUsersBetween"
+            resultType="com.lapoit.api.dto.history.DailyDauDto">
+        SELECT
+        DATE(login_at) AS date,
+        COUNT(DISTINCT user_id) AS dau
+        FROM login_history
+        WHERE login_at >= #{start}
+        AND login_at <![CDATA[<]]> #{end}
+        GROUP BY DATE(login_at)
+        ORDER BY DATE(login_at)
+    </select>
+
+</mapper>

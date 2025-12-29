@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         // 그 외 /api/** 는 전부 인증 필요
                         .requestMatchers("/api/v1/auth/logout").authenticated()
+                        .requestMatchers("/api/v1/history/**").authenticated()
                         .requestMatchers("/api/v1/user/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").authenticated()
                         //hasAuthority("ADMIN")
