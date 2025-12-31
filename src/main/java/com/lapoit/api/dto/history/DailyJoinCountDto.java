@@ -9,9 +9,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyDauDto {
+public class DailyJoinCountDto {
     private LocalDate date;
-    private Long dau;
-
-
+    private Long joinCount;
 }

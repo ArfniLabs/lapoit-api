@@ -1,6 +1,8 @@
 package com.lapoit.api.mapper;
 
 import com.lapoit.api.domain.PlayGameStatus;
+import com.lapoit.api.dto.history.DailyJoinCountDto;
+import com.lapoit.api.dto.history.GameDto;
 import com.lapoit.api.dto.playgame.AdminPlayGameCreateRequest;
 import com.lapoit.api.dto.playgame.AdminPlayGameResponse;
 import com.lapoit.api.dto.playgame.PlayGameResponse;
@@ -8,6 +10,7 @@ import com.lapoit.api.dto.playgame.PlayGameRow;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -71,5 +74,13 @@ public interface PlayGameMapper {
 
     PlayGameRow findById(@Param("playGameId") Long playGameId);
 
+    List<GameDto> selectJoinCountByStoreAndDate(
+            @Param("attendanceDate") LocalDate attendanceDate
+    );
+
+    List<DailyJoinCountDto> selectDailyJoinCount(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
 

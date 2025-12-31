@@ -2,6 +2,8 @@ package com.lapoit.api.controller;
 
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.history.DailyDauDto;
+import com.lapoit.api.dto.history.DailyGameAndDauDto;
+import com.lapoit.api.dto.history.DailyGameDto;
 import com.lapoit.api.service.UserHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,7 +42,7 @@ public class UserHistoryController {
                                                                         LocalDate startDate,
                                                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                                                                         LocalDate endDate){
-        List<DailyDauDto> day=userHistoryService.rangeUser(startDate,endDate);
+        List<DailyGameAndDauDto> day=userHistoryService.rangeUser(startDate,endDate);
 
         return ResponseEntity.ok(
                 ApiResponseDto.success("USER_HISTORY-200", "특정기간 방문 유저 조회 성공", day)
@@ -48,7 +50,15 @@ public class UserHistoryController {
     }
 
     //오늘 게임참가자 조회 (이건 각 지점별 게임 참가자수와 함께 조회 하도록 하면 최종 총 몇몇인지도 함께 출력하도록 한다)
+    @GetMapping("/today/game")
+    public ResponseEntity<?> todayGame() {
+        DailyGameDto today = userHistoryService.getTodayGame();
 
-    //시작 날짜 끝나는 날짜 기준 하루에 몇몇 게임 참가자 조회 (이건 단순히 하루당 총 몇몇인지 출력하도록 한다
+        return ResponseEntity.ok(
+                ApiResponseDto.success("USER_HISTORY-200", "오늘 게임 참가자 조회 성공", today)
+        );
+
+    }
+
 
 }

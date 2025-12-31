@@ -57,8 +57,11 @@ public enum ErrorCode {
     SCORE_ALREADY_EXISTS(HttpStatus.CONFLICT, "SCORE-409", "해당 스코어 테이블이 이미 존재합니다."),
     POINT_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"POINT-400","포인트가 부족합니다." ),
     RANKING_NOT_FOUND(HttpStatus.BAD_REQUEST,"POINT-401","랭킹을 찾을수 없습니다." ),
-    SCORE_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"SCORE-402","승점이 부족합니다.");
+    SCORE_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"SCORE-402","승점이 부족합니다."),
 
+    //히스토리 관련
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST,"HISTORY-400","날짜 범위가 올바르지 않습니다."),
+    END_DATE_IN_FUTURE(HttpStatus.BAD_REQUEST,"HISTORY-401","종료 날짜가 현재보다 미래입니다.");
 
     private final HttpStatus status;
     private final String code;

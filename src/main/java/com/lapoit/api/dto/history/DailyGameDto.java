@@ -1,17 +1,20 @@
 package com.lapoit.api.dto.history;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyDauDto {
-    private LocalDate date;
-    private Long dau;
+public class DailyGameDto {
+
+    private Long joinCount;
+    private List<GameDto> gameList;
 
 
 }
