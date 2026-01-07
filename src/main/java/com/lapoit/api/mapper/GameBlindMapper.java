@@ -26,5 +26,9 @@ public interface GameBlindMapper {
     );
 
     List<GameBlind> findByGameId(@Param("gameId") Long gameId);
+
+    boolean existsByGameIdAndLevel(@Param("gameId") Long gameId,
+                                   @Param("level") Integer level);
+
 }
 

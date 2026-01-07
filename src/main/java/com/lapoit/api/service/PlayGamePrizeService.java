@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class PlayGamePrizeService {
 
     private final PlayGameMapper playGameMapper;
     private final PlayGamePrizeMapper prizeMapper;
+    private final SseService sseService;
 
     public List<PlayGamePrizeDto> registerPrizes(
             Long playGameId,
@@ -45,6 +47,9 @@ public class PlayGamePrizeService {
                             .build()
             );
         }
+
+        // 상금 입력 sse 메세지 전송
+        sseService.sendToPlayGame(String.valueOf(playGameId), "PRIZE_UPDATED", Map.of("playGameId", playGameId));
 
         // 🔥 입력된 상금 그대로 반환
         return prizes;
