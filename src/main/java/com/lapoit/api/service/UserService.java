@@ -34,6 +34,7 @@ public class UserService {
     private final UserGameMapper userGameMapper;
     private final RankingMapper rankingMapper;
     private final StoreMapper storeMapper;
+    private final SseService sseService;
 
     public UserResponseDto getMyInfo(String userId) {
         User user= userMapper.findByUserId(userId);
