@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lapoit.api.mapper.PlayGamePrizeMapper">
+
+    <insert id="insertPrize">
+        INSERT INTO play_game_prize
+        (play_game_id, prize_rank, prize_amount)
+        VALUES
+        (#{playGameId}, #{prizeRank}, #{prizeAmount})
+    </insert>
+
+    <select id="findByPlayGameId"
+            resultType="com.lapoit.api.domain.PlayGamePrize">
+        SELECT
+        prize_rank,
+        prize_amount
+        FROM play_game_prize
+        WHERE play_game_id = #{playGameId}
+        ORDER BY prize_rank ASC
+    </select>
+
+    <delete id="deleteByPlayGameId">
+        DELETE FROM play_game_prize
+        WHERE play_game_id = #{playGameId}
+    </delete>
+
+</mapper>

@@ -3,11 +3,15 @@ package com.lapoit.api.controller;
 import com.lapoit.api.controller.docs.AdminGameControllerDocs;
 import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.game.*;
+import com.lapoit.api.dto.playgame.PlayGamePrizeCreateRequest;
+import com.lapoit.api.dto.playgame.PlayGamePrizeDto;
 import com.lapoit.api.service.AdminGameService;
+import com.lapoit.api.service.PlayGamePrizeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -16,6 +20,7 @@ import java.util.Map;
 public class AdminGameController implements AdminGameControllerDocs {
 
     private final AdminGameService adminGameService;
+    private final PlayGamePrizeService prizeService;
 
     // 게임 생성
     @PostMapping
@@ -107,5 +112,25 @@ public class AdminGameController implements AdminGameControllerDocs {
                 )
         );
     }
+
+    // 게임 상금 입력
+    @PostMapping("/{playGameId}/prizes")
+    public ResponseEntity<ApiResponseDto<?>> registerPrizes(
+            @PathVariable("playGameId") Long playGameId,
+            @RequestBody PlayGamePrizeCreateRequest request
+    ) {
+        List<PlayGamePrizeDto> result =
+                prizeService.registerPrizes(playGameId, request.getPrizes());
+
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "GAME-201",
+                        "게임 상금 입력 완료",
+                        result
+                )
+        );
+    }
+
+
 }
 

@@ -2,16 +2,14 @@ package com.lapoit.api.service;
 
 import com.lapoit.api.domain.Game;
 import com.lapoit.api.domain.GameBlind;
+import com.lapoit.api.dto.playgame.PlayGamePrizeDto;
 import com.lapoit.api.dto.playgame.PlayGameDetailResponse;
 import com.lapoit.api.dto.playgame.PlayGameRow;
 import com.lapoit.api.dto.playgame.PlayGameStoreViewResponse;
 import com.lapoit.api.dto.playgame.UserGamePlayerDto;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
-import com.lapoit.api.mapper.GameBlindMapper;
-import com.lapoit.api.mapper.GameMapper;
-import com.lapoit.api.mapper.PlayGameMapper;
-import com.lapoit.api.mapper.UserGameMapper;
+import com.lapoit.api.mapper.*;
 import com.lapoit.api.util.GameProgressCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,7 @@ public class PlayGameQueryService {
     private final GameProgressCalculator calculator;
     private final UserGameMapper userGameMapper;
     private final GameProgressCalculator gameProgressCalculator;
+    private final PlayGamePrizeMapper prizeMapper;
 
     public List<PlayGameStoreViewResponse> getGamesByStore(Long storeId) {
 
@@ -68,12 +67,26 @@ public class PlayGameQueryService {
         List<UserGamePlayerDto> players =
                 userGameMapper.findPlayersByPlayGameId(playGameId);
 
-        // 6️⃣ 최종 응답 조합
+        List<PlayGamePrizeDto> prizes =
+                prizeMapper.findByPlayGameId(playGameId)
+                        .stream()
+                        .map(p -> {
+                            PlayGamePrizeDto dto = new PlayGamePrizeDto();
+                            dto.setRank(p.getPrizeRank());
+                            dto.setAmount(p.getPrizeAmount());
+                            return dto;
+                        })
+                        .toList();
+
         return PlayGameDetailResponse.of(
                 progress,
                 game,
-                players
+                players,
+                prizes
         );
+
+
+
     }
 
 

@@ -11,4 +11,7 @@ public class GameBlindDto {
     private Integer bigBlind;
     private Integer ante;
     private Integer duration;
+
+    // 🔥 브레이크용
+    private Boolean isBreak;        // true면 브레이크 레벨
 }
