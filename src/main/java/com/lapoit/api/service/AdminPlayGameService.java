@@ -1,9 +1,6 @@
 package com.lapoit.api.service;
 
-import com.lapoit.api.domain.Game;
-import com.lapoit.api.domain.GameReEntry;
-import com.lapoit.api.domain.User;
-import com.lapoit.api.domain.UserGame;
+import com.lapoit.api.domain.*;
 import com.lapoit.api.dto.playgame.*;
 import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
@@ -13,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +20,12 @@ import java.util.List;
 public class AdminPlayGameService {
 
     private final GameMapper gameMapper;
+    private final GameBlindMapper gameBlindMapper;
     private final GameReEntryMapper gameReEntryMapper;
     private final PlayGameMapper playGameMapper;
     private final UserGameMapper userGameMapper;
     private final UserMapper userMapper;
+    private final SseService sseService;
 
     public PlayGameResponse createPlayGame(AdminPlayGameCreateRequest dto) {
 
@@ -42,6 +43,8 @@ public class AdminPlayGameService {
     public PlayGameResponse startPlayGame(Long playGameId) {
         playGameMapper.startPlayGame(playGameId);
 
+        // 게임 시작 SSE 메시지발행
+        sseService.sendToPlayGame(String.valueOf(playGameId), "GAME_STARTED", Map.of("playGameId", playGameId));
         return playGameMapper.findPlayGameById(playGameId);
     }
 
@@ -53,6 +56,9 @@ public class AdminPlayGameService {
         }
 
         playGameMapper.pausePlayGame(playGameId);
+
+        // 게임 정지 SSE 메시지 발행
+        sseService.sendToPlayGame(String.valueOf(playGameId), "GAME_PAUSED", Map.of("playGameId", playGameId));
         return playGameMapper.findPlayGameById(playGameId);
     }
 
@@ -64,6 +70,9 @@ public class AdminPlayGameService {
         }
 
         playGameMapper.resumePlayGame(playGameId);
+
+        // 게임 재개 SSE 메시지 전송
+        sseService.sendToPlayGame(String.valueOf(playGameId), "GAME_RESUMED", Map.of("playGameId", playGameId));
         return playGameMapper.findPlayGameById(playGameId);
     }
 
@@ -135,6 +144,10 @@ public class AdminPlayGameService {
                 gameInfo.getGameStack()
         );
 
+        // 인원 추가 sse 발행
+        sseService.sendToPlayGame(String.valueOf(playGameId), "PLAYER_JOIN", Map.of("playGameId", playGameId));
+
+
         // 9️⃣ 응답
         return AdminJoinGameResponse.builder()
                 .userId(user.getId())
@@ -167,6 +180,9 @@ public class AdminPlayGameService {
 
         // 5. 현재 인원 감소
         playGameMapper.decreaseNowPeople(playGameId);
+
+        // 유저 아웃 sse 알림
+        sseService.sendToPlayGame(String.valueOf(playGameId), "PLAYER_OUT", Map.of("playGameId", playGameId));
 
         // 6. 최신 게임 정보 반환
         return playGameMapper.findPlayGameById(playGameId);
@@ -213,6 +229,9 @@ public class AdminPlayGameService {
             userGameMapper.reviveUser(userGame.getUserGameId());
             playGameMapper.increaseNowPeople(playGameId);
         }
+
+        // 유저 리바인 SSE 알람
+        sseService.sendToPlayGame(String.valueOf(playGameId), "REBUY", Map.of("playGameId", playGameId));
     }
 
     @Transactional
@@ -257,6 +276,48 @@ public class AdminPlayGameService {
             userGameMapper.markDie(userGame.getUserGameId());
             playGameMapper.decreaseNowPeople(playGameId);
         }
+
+        sseService.sendToPlayGame(String.valueOf(playGameId), "REBUY", Map.of("playGameId", playGameId));
+    }
+
+    @Transactional
+    public void nextLevel(Long playGameId) {
+
+        PlayGameResponse game = playGameMapper.findPlayGameById(playGameId);
+        if (game == null) {
+            throw new CustomException(ErrorCode.GAME_NOT_FOUND);
+        }
+
+        // STARTED 상태에서만 자동 레벨업
+        if (!"STARTED".equals(game.getGameStatus())) {
+            return;
+        }
+
+        int currentLevel = game.getGameLevel();
+        int nextLevel = currentLevel + 1;
+
+        // 다음 블라인드 존재 확인
+        if (!gameBlindMapper.existsByGameIdAndLevel(game.getGameId(), nextLevel)) {
+            // 더 이상 레벨 없음 → 게임 종료
+            playGameMapper.finishGame(playGameId);
+            return;
+        }
+
+        // 🔥 일반 레벨 → 레벨 증가
+        playGameMapper.updateLevel(
+                playGameId,
+                nextLevel,
+                LocalDateTime.now()
+        );
+
+        sseService.sendToPlayGame(
+                String.valueOf(playGameId),
+                "LEVEL_CHANGED",
+                Map.of(
+                        "playGameId", playGameId,
+                        "level", nextLevel
+                )
+        );
     }
 
 

@@ -143,14 +143,13 @@
     <!-- ========================= -->
     <!-- 레벨 업 -->
     <!-- ========================= -->
-    <update id="levelUp">
+    <update id="updateLevel">
         UPDATE play_game
-        SET
-        game_level = #{nextLevel},
-        level_start_at = NOW(),
-        level_stop_time = 0
+        SET game_level = #{level},
+        level_start_at = #{startAt}
         WHERE play_game_id = #{playGameId}
     </update>
+
 
 
     <!-- ========================= -->

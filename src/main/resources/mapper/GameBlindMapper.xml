@@ -67,6 +67,14 @@
     </update>
 
 
+    <select id="existsByGameIdAndLevel" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM game_blind
+        WHERE game_id = #{gameId}
+        AND level = #{level}
+    </select>
+
+
 
 
     <delete id="deleteByGameId">

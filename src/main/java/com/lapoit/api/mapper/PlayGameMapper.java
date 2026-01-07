@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -37,12 +38,10 @@ public interface PlayGameMapper {
     List<PlayGameRow> findStartedGames();
 
 
-    /** 레벨 업 */
-    void levelUp(
-            @Param("playGameId") Long playGameId,
-            @Param("currentLevel") Integer currentLevel,
-            @Param("nextLevel") Integer nextLevel
-    );
+    void updateLevel(@Param("playGameId") Long playGameId,
+                     @Param("level") Integer level,
+                     @Param("startAt") LocalDateTime startAt);
+
 
     /** 게임 종료 */
     void finishGame(@Param("playGameId") Long playGameId);
