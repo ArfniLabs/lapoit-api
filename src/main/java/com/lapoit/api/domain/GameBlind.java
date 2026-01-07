@@ -16,5 +16,7 @@ public class GameBlind {
     private Integer smallBlind;
     private Integer ante;
     private Integer duration; // 블라인드 시간 (분)
+
+    private boolean isBreak;
 }
 

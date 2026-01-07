@@ -31,6 +31,8 @@ public class PlayGameDetailResponse {
     private Integer totalStack;
     private Integer averageStack;
 
+    private String gameStatus;       // WAIT / STARTED / PAUSED / FINISHED
+
     // GAME 설정
     private Integer startingStack;
     private Integer buyinPrice;
@@ -39,6 +41,10 @@ public class PlayGameDetailResponse {
 
     // 참가자
     private List<UserGamePlayerDto> players;
+
+    // 상금 (판별)
+    private List<PlayGamePrizeDto> prizes;
+
 
     public static PlayGameDetailResponse of(
             PlayGameStoreViewResponse progress,
@@ -64,6 +70,7 @@ public class PlayGameDetailResponse {
                 .rebuyinCount(progress.getRebuyinCount())
                 .totalStack(progress.getTotalStack())
                 .averageStack(progress.getAverageStack())
+                .gameStatus(progress.getGameStatus())
 
                 .startingStack(game.getGameStack())
                 .buyinPrice(game.getGamePrice())
@@ -73,5 +80,47 @@ public class PlayGameDetailResponse {
                 .players(players)
                 .build();
     }
+
+
+    public static PlayGameDetailResponse of(
+            PlayGameStoreViewResponse progress,
+            Game game,
+            List<UserGamePlayerDto> players,
+            List<PlayGamePrizeDto> prizes
+    ) {
+        return PlayGameDetailResponse.builder()
+                .playGameId(progress.getPlayGameId())
+                .gameSubtitle(progress.getGameSubtitle())
+                .gameName(progress.getGameName())
+
+                .startAt(progress.getStartAt())
+                .currentLevel(progress.getCurrentLevel())
+                .levelStartAt(progress.getLevelStartAt())
+                .levelDurationMinutes(progress.getLevelDurationMinutes())
+                .levelRemainingSeconds(progress.getLevelRemainingSeconds())
+
+                .currentBlind(progress.getCurrentBlind())
+                .nextBlind(progress.getNextBlind())
+
+                .totalPeople(progress.getTotalPeople())
+                .nowPeople(progress.getNowPeople())
+                .rebuyinCount(progress.getRebuyinCount())
+                .totalStack(progress.getTotalStack())
+                .averageStack(progress.getAverageStack())
+                .gameStatus(progress.getGameStatus())
+
+                .startingStack(game.getGameStack())
+                .buyinPrice(game.getGamePrice())
+                .buyinLimitCount(game.getGameLimit())
+                .buyinEndLevel(game.getBuyinEndLevel())
+
+                .players(players)
+
+                // 🔥 추가
+                .prizes(prizes)
+
+                .build();
+    }
+
 }
 
