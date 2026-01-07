@@ -29,6 +29,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = jwtTokenProvider.resolveToken(request);
+        if (token == null && request.getRequestURI().startsWith("/api/v1/sse/subscribe")) {
+            String queryToken = request.getParameter("token");
+            if (queryToken != null && !queryToken.isBlank()) {
+                token = queryToken.startsWith("Bearer ") ? queryToken.substring(7) : queryToken;
+            }
+        }
 
 //        System.out.println("[JWT] uri=" + request.getRequestURI());
 //        System.out.println("[JWT] authorization=" + request.getHeader("Authorization"));
