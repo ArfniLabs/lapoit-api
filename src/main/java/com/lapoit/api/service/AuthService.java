@@ -10,10 +10,7 @@ import com.lapoit.api.exception.CustomException;
 import com.lapoit.api.exception.ErrorCode;
 import com.lapoit.api.jwt.CustomUserDetails;
 import com.lapoit.api.jwt.JwtTokenProvider;
-import com.lapoit.api.mapper.StoreMapper;
-import com.lapoit.api.mapper.TempUserMapper;
-import com.lapoit.api.mapper.UserMapper;
-import com.lapoit.api.mapper.UserScoreMapper;
+import com.lapoit.api.mapper.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -40,6 +37,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final StoreMapper storeMapper;
     private final UserScoreMapper userScoreMapper;
+    private final LoginHistoryMapper loginHistoryMapper;
 
     private void checkExistenceAndThrow(Object existing, Object existingTemp, ErrorCode errorCode) {
         if (existing != null || existingTemp != null) {
@@ -136,6 +134,10 @@ public class AuthService {
                 refreshTtlMillis,
                 TimeUnit.MILLISECONDS
         );
+
+        //유저히스토리에 유저 체크하기
+        loginHistoryMapper.insertLoginHistory(user.getId());
+
 
 
 

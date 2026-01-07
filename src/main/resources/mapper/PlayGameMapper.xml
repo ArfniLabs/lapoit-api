@@ -235,6 +235,36 @@
     </select>
 
 
+    <select id="selectJoinCountByStoreAndDate"
+            parameterType="java.time.LocalDate"
+            resultType="com.lapoit.api.dto.history.GameDto">
+
+        SELECT
+        s.store_id   AS storeId,
+        s.store_name AS storeName,
+        COUNT(DISTINCT ug.id) AS joinCount
+        FROM user_game ug
+        JOIN store s ON s.store_id = ug.store_id
+        WHERE ug.attendance_date = #{attendanceDate}
+        AND ug.status IN ('ALIVE', 'OUT')
+        GROUP BY s.store_id, s.store_name
+        ORDER BY joinCount DESC
+
+    </select>
+
+
+    <select id="selectDailyJoinCount"
+            resultType="com.lapoit.api.dto.history.DailyJoinCountDto">
+        SELECT
+        ug.attendance_date AS date,
+        COUNT(DISTINCT ug.id) AS joinCount
+        FROM user_game ug
+        WHERE ug.attendance_date BETWEEN #{startDate} AND #{endDate}
+        AND ug.status IN ('ALIVE', 'OUT')
+        GROUP BY ug.attendance_date
+        ORDER BY ug.attendance_date
+    </select>
+
 
 
 

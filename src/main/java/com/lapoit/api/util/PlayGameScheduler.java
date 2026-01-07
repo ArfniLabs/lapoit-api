@@ -6,6 +6,7 @@ import com.lapoit.api.mapper.GameBlindMapper;
 import com.lapoit.api.mapper.PlayGameMapper;
 import com.lapoit.api.mapper.UserGameMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class PlayGameScheduler {

@@ -15,8 +15,9 @@ public class UserResponseDto {
     private String userName;
     private String userNickname;
     private Integer storeId;
-    private String phoneNumber;// USER / ADMIN / SUPERADMIN
+    private String phoneNumber;
     private String code;// ACTIVE / INACTIVE
     private String createAt;
     private Long point;
+    private String role;
 }

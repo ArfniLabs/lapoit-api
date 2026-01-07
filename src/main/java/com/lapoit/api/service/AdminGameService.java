@@ -37,18 +37,28 @@ public class AdminGameService {
 
         Long gameId = game.getGameId();
 
-        dto.getBlinds().forEach(b ->
-                blindMapper.insertBlind(
-                        GameBlind.builder()
-                                .gameId(gameId)
-                                .level(b.getLevel())
-                                .smallBlind(b.getSmallBlind())
-                                .bigBlind(b.getBigBlind())
-                                .ante(b.getAnte())
-                                .duration(b.getDuration())
-                                .build()
-                )
-        );
+        dto.getBlinds().forEach(b -> {
+
+            boolean isBreak = Boolean.TRUE.equals(b.getIsBreak());
+
+            blindMapper.insertBlind(
+                    GameBlind.builder()
+                            .gameId(gameId)
+                            .level(b.getLevel())
+
+                            // 브레이크면 블라인드 값 제거
+                            .smallBlind(isBreak ? null : b.getSmallBlind())
+                            .bigBlind(isBreak ? null : b.getBigBlind())
+                            .ante(isBreak ? null : b.getAnte())
+
+                            // 공용 duration
+                            .duration(b.getDuration())
+
+                            .isBreak(isBreak)
+                            .build()
+            );
+        });
+
 
         dto.getReEntries().forEach(r ->
                 reEntryMapper.insertReEntry(
@@ -84,18 +94,24 @@ public class AdminGameService {
         reEntryMapper.deleteByGameId(gameId);
 
         dto.getBlinds().forEach(b -> {
-            b.setLevel(b.getLevel());
+
+            boolean isBreak = Boolean.TRUE.equals(b.getIsBreak());
+
             blindMapper.insertBlind(
                     GameBlind.builder()
                             .gameId(gameId)
                             .level(b.getLevel())
-                            .smallBlind(b.getSmallBlind())
-                            .bigBlind(b.getBigBlind())
-                            .ante(b.getAnte())
+
+                            .smallBlind(isBreak ? null : b.getSmallBlind())
+                            .bigBlind(isBreak ? null : b.getBigBlind())
+                            .ante(isBreak ? null : b.getAnte())
+
                             .duration(b.getDuration())
+                            .isBreak(isBreak)
                             .build()
             );
         });
+
 
         dto.getReEntries().forEach(r ->
                 reEntryMapper.insertReEntry(
@@ -116,8 +132,17 @@ public class AdminGameService {
 
     // 게임 블라인드 수정
     public void patchGameBlind(Long gameId, GameBlindDto dto) {
+
+        if (Boolean.TRUE.equals(dto.getIsBreak())) {
+            // 브레이크로 전환 → 블라인드 값 제거
+            dto.setSmallBlind(null);
+            dto.setBigBlind(null);
+            dto.setAnte(null);
+        }
+
         blindMapper.patchGameBlind(gameId, dto);
     }
+
 
     // 게임 리앤트리 수정
     public void patchGameReEntry(Long gameId, Integer count, GameReEntryPatchRequest dto) {
@@ -147,6 +172,7 @@ public class AdminGameService {
                                 dto.setBigBlind(b.getBigBlind());
                                 dto.setAnte(b.getAnte());
                                 dto.setDuration(b.getDuration());
+                                dto.setIsBreak(b.isBreak());
                                 return dto;
                             })
                             .toList();
