@@ -31,6 +31,8 @@ public class PlayGameDetailResponse {
     private Integer totalStack;
     private Integer averageStack;
 
+    private String gameStatus;       // WAIT / STARTED / PAUSED / FINISHED
+
     // GAME 설정
     private Integer startingStack;
     private Integer buyinPrice;
@@ -68,6 +70,7 @@ public class PlayGameDetailResponse {
                 .rebuyinCount(progress.getRebuyinCount())
                 .totalStack(progress.getTotalStack())
                 .averageStack(progress.getAverageStack())
+                .gameStatus(progress.getGameStatus())
 
                 .startingStack(game.getGameStack())
                 .buyinPrice(game.getGamePrice())
@@ -104,6 +107,7 @@ public class PlayGameDetailResponse {
                 .rebuyinCount(progress.getRebuyinCount())
                 .totalStack(progress.getTotalStack())
                 .averageStack(progress.getAverageStack())
+                .gameStatus(progress.getGameStatus())
 
                 .startingStack(game.getGameStack())
                 .buyinPrice(game.getGamePrice())
