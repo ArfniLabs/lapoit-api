@@ -157,54 +157,56 @@ public class AdminPlayGameService {
     }
 
 
-    public PlayGameResponse outPlayer(Long playGameId, Long userId) {
+    public PlayGameResponse outPlayer(Long playGameId, Long userGameId) {
 
-        // 1. 게임 상태 체크
+        // 1️⃣ 게임 상태 체크
         String status = playGameMapper.findStatusById(playGameId);
         if (!"STARTED".equals(status)) {
             throw new CustomException(ErrorCode.GAME_NOT_STARTED);
         }
 
-        // 2. 참가 여부 확인
-        if (!userGameMapper.existsByPlayGameIdAndUserId(playGameId, userId)) {
+        // 2️⃣ 유저 게임 조회
+        UserGame userGame = userGameMapper.findByUserGameId(userGameId);
+        if (userGame == null || !userGame.getPlayGameId().equals(playGameId)) {
             throw new CustomException(ErrorCode.USER_NOT_IN_GAME);
         }
 
-        // 3. 이미 탈락한 유저인지
-        if (userGameMapper.isOutPlayer(playGameId, userId)) {
+        // 3️⃣ 이미 탈락한 경우
+        if ("DIE".equals(userGame.getStatus())) {
             throw new CustomException(ErrorCode.USER_ALREADY_OUT);
         }
 
-        // 4. 유저 OUT 처리
-        userGameMapper.outPlayer(playGameId, userId);
-
-        // 5. 현재 인원 감소
+        // 4️⃣ 탈락 처리
+        userGameMapper.markDie(userGameId);
         playGameMapper.decreaseNowPeople(playGameId);
 
-        // 유저 아웃 sse 알림
-        sseService.sendToPlayGame(String.valueOf(playGameId), "PLAYER_OUT", Map.of("playGameId", playGameId));
+        // SSE
+        sseService.sendToPlayGame(
+                String.valueOf(playGameId),
+                "PLAYER_OUT",
+                Map.of("userGameId", userGameId)
+        );
 
-        // 6. 최신 게임 정보 반환
         return playGameMapper.findPlayGameById(playGameId);
     }
 
 
-    @Transactional
-    public void rebuy(Long playGameId, Long userId) {
 
-        // 0️⃣ 게임 상태 체크
+    @Transactional
+    public void rebuy(Long playGameId, Long userGameId) {
+
         String gameStatus = playGameMapper.findStatusById(playGameId);
         if (!"STARTED".equals(gameStatus)) {
             throw new CustomException(ErrorCode.GAME_NOT_STARTED);
         }
 
-        // 1️⃣ 유저 게임 상태 조회
-        UserGame userGame =
-                userGameMapper.findByPlayGameIdAndUserId(playGameId, userId);
+        UserGame userGame = userGameMapper.findByUserGameId(userGameId);
+        if (userGame == null || !userGame.getPlayGameId().equals(playGameId)) {
+            throw new CustomException(ErrorCode.USER_NOT_IN_GAME);
+        }
 
         int nextRebuyCount = userGame.getRebuyinCount() + 1;
 
-        // 2️⃣ 리바인 정책 조회
         GameReEntry reEntry =
                 gameReEntryMapper.findByGameIdAndCount(
                         userGame.getGameId(),
@@ -215,70 +217,111 @@ public class AdminPlayGameService {
             throw new CustomException(ErrorCode.REBUYIN_COUNT_FULL);
         }
 
-        // 3️⃣ 유저 리바인 횟수 증가
-        userGameMapper.increaseRebuyCount(userGame.getUserGameId());
-
-        // 4️⃣ 게임 전체 리바인 카운트 증가
+        userGameMapper.increaseRebuyCount(userGameId);
         playGameMapper.increaseRebuyinCount(playGameId);
-
-        // 5️⃣ 스택 증가
         playGameMapper.addStack(playGameId, reEntry.getReEntryStack());
 
-        // 6️⃣ 탈락 유저라면 부활
-        if ("OUT".equals(userGame.getStatus())) {
-            userGameMapper.reviveUser(userGame.getUserGameId());
+        if ("DIE".equals(userGame.getStatus())) {
+            userGameMapper.reviveUser(userGameId);
             playGameMapper.increaseNowPeople(playGameId);
         }
 
-        // 유저 리바인 SSE 알람
-        sseService.sendToPlayGame(String.valueOf(playGameId), "REBUY", Map.of("playGameId", playGameId));
+        sseService.sendToPlayGame(
+                String.valueOf(playGameId),
+                "REBUY",
+                Map.of("userGameId", userGameId)
+        );
     }
 
+
     @Transactional
-    public void cancelRebuy(Long playGameId, Long userId) {
+    public void cancelRebuy(Long playGameId, Long userGameId) {
 
-        // 1️⃣ 유저 게임 조회
-        UserGame userGame =
-                userGameMapper.findByPlayGameIdAndUserId(playGameId, userId);
-
+        UserGame userGame = userGameMapper.findByUserGameId(userGameId);
         if (userGame == null) {
-            throw new IllegalArgumentException("유저가 해당 게임에 참가하지 않음");
+            throw new CustomException(ErrorCode.USER_NOT_IN_GAME);
         }
 
         int currentRebuyCount = userGame.getRebuyinCount();
 
-        if (currentRebuyCount <= 0) {
-            throw new IllegalStateException("취소할 리바인이 없음");
-        }
 
-        // 2️⃣ 취소 대상 리바인 정책 조회
         GameReEntry reEntry =
                 gameReEntryMapper.findByGameIdAndCount(
                         userGame.getGameId(),
                         currentRebuyCount
                 );
 
-        if (reEntry == null) {
-            throw new IllegalStateException("리바인 정책 없음");
-        }
-
-        // 3️⃣ 유저 리바인 횟수 감소
-        userGameMapper.decreaseRebuyCount(userGame.getUserGameId());
-
-        // 4️⃣ 게임 전체 리바인 카운트 감소
+        userGameMapper.decreaseRebuyCount(userGameId);
         playGameMapper.decreaseRebuyinCount(playGameId);
-
-        // 5️⃣ 스택 감소
         playGameMapper.subtractStack(playGameId, reEntry.getReEntryStack());
 
-        // 6️⃣ 부활 리바인 취소라면 다시 탈락 처리
         if ("ALIVE".equals(userGame.getStatus()) && currentRebuyCount == 1) {
-            userGameMapper.markDie(userGame.getUserGameId());
+            userGameMapper.markDie(userGameId);
             playGameMapper.decreaseNowPeople(playGameId);
         }
 
-        sseService.sendToPlayGame(String.valueOf(playGameId), "REBUY", Map.of("playGameId", playGameId));
+        sseService.sendToPlayGame(
+                String.valueOf(playGameId),
+                "REBUY",
+                Map.of("userGameId", userGameId)
+        );
     }
+
+
+
+    @Transactional
+    public AdminJoinGameResponse joinGuest(Long playGameId, String guestName) {
+
+        // 1️⃣ 게임 존재 확인
+        PlayGameResponse game = playGameMapper.findPlayGameById(playGameId);
+        if (game == null) {
+            throw new CustomException(ErrorCode.GAME_NOT_FOUND);
+        }
+
+        if ("FINISHED".equals(game.getGameStatus())) {
+            throw new CustomException(ErrorCode.GAME_ALREADY_FINISHED);
+        }
+
+
+        Game gameInfo = gameMapper.findById(game.getGameId());
+
+        String today = LocalDate.now().toString();
+
+        // 2️⃣ 비회원 참가 INSERT
+        userGameMapper.insertGuestUserGame(
+                playGameId,
+                game.getGameId(),
+                game.getStoreId(),
+                guestName,
+                today
+        );
+
+        // 3️⃣ 스택 + 인원 증가
+        playGameMapper.addStackOnJoin(
+                playGameId,
+                gameInfo.getGameStack()
+        );
+
+        // 4️⃣ SSE 발행
+        sseService.sendToPlayGame(
+                String.valueOf(playGameId),
+                "PLAYER_JOIN",
+                Map.of(
+                        "playGameId", playGameId,
+                        "guest", true,
+                        "guestName", guestName
+                )
+        );
+
+        // 5️⃣ 응답
+        return AdminJoinGameResponse.builder()
+                .userId(null)
+                .name(guestName)
+                .nickname(null)
+                .guest(true)
+                .build();
+    }
+
 
     @Transactional
     public void nextLevel(Long playGameId) {
@@ -317,6 +360,29 @@ public class AdminPlayGameService {
                         "playGameId", playGameId,
                         "level", nextLevel
                 )
+        );
+    }
+
+
+    @Transactional
+    public void updatePayment(Long userGameId, UserGamePaymentRequest request) {
+
+        UserGame userGame = userGameMapper.findByUserGameId(userGameId);
+        if (userGame == null) {
+            throw new CustomException(ErrorCode.USER_NOT_IN_GAME);
+        }
+
+        // 결제 여부에 따라 paidAt 자동 처리
+        LocalDateTime paidAt = request.isPaid()
+                ? LocalDateTime.now()
+                : null;
+
+        userGameMapper.updatePayment(
+                userGameId,
+                request.isPaid(),
+                request.getPaymentMethod(),   // enum → VARCHAR
+                request.getPaymentMemo(),
+                paidAt
         );
     }
 

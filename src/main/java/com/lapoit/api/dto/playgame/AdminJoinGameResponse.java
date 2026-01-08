@@ -10,5 +10,6 @@ public class AdminJoinGameResponse {
     private Long userId;
     private String nickname;
     private String name;
+    private boolean guest;
 }
 
