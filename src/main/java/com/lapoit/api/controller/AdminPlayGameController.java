@@ -78,45 +78,44 @@ public class AdminPlayGameController implements AdminPlayGameControllerDocs {
     }
 
     /** 게임 탈락 처리 */
-    @PatchMapping("/{playGameId}/out/{userId}")
+    @PatchMapping("/{playGameId}/out/{userGameId}")
     public ResponseEntity<ApiResponseDto<?>> outPlayer(
-            @PathVariable("playGameId") Long playGameId,
-            @PathVariable("userId") Long userId
+            @PathVariable Long playGameId,
+            @PathVariable Long userGameId
     ) {
         return ResponseEntity.ok(
                 ApiResponseDto.success(
                         "GAME-206",
                         "플레이어 탈락 처리",
-                        adminPlayGameService.outPlayer(playGameId, userId)
+                        adminPlayGameService.outPlayer(playGameId, userGameId)
                 )
         );
     }
 
-
     /** 리바인 증가 */
-    @PatchMapping("/{playGameId}/rebuy/{userId}")
+    @PatchMapping("/{playGameId}/rebuy/{userGameId}")
     public ResponseEntity<?> rebuy(
-            @PathVariable("playGameId") Long playGameId,
-            @PathVariable("userId") Long userId
+            @PathVariable Long playGameId,
+            @PathVariable Long userGameId
     ) {
-        adminPlayGameService.rebuy(playGameId, userId);
+        adminPlayGameService.rebuy(playGameId, userGameId);
         return ResponseEntity.ok(
                 ApiResponseDto.success("GAME-210", "리바인 완료", null)
         );
     }
 
-
-    /** 리바인 감소(관리자 실수 복구용) */
-    @PatchMapping("/{playGameId}/rebuy/cancel")
+    /** 리바인 감소 */
+    @PatchMapping("/{playGameId}/rebuy/cancel/{userGameId}")
     public ResponseEntity<ApiResponseDto<?>> cancelRebuy(
-            @PathVariable("playGameId") Long playGameId,
-            @RequestBody RebuyCancelRequest request
+            @PathVariable Long playGameId,
+            @PathVariable Long userGameId
     ) {
-        adminPlayGameService.cancelRebuy(playGameId, request.getUserId());
+        adminPlayGameService.cancelRebuy(playGameId, userGameId);
         return ResponseEntity.ok(
                 ApiResponseDto.success("REBUY-204", "리바인 취소 완료", null)
         );
     }
+
 
 
 
@@ -139,6 +138,41 @@ public class AdminPlayGameController implements AdminPlayGameControllerDocs {
                 )
         );
     }
+
+    /** 비회원 게임 참가 */
+    @PostMapping("/{playGameId}/join-guest")
+    public ResponseEntity<ApiResponseDto<?>> joinGuest(
+            @PathVariable("playGameId") Long playGameId,
+            @RequestBody AdminJoinGuestRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "GAME-201",
+                        "비회원이 게임에 참가했습니다.",
+                        adminPlayGameService.joinGuest(
+                                playGameId,
+                                request.getGuestName()
+                        )
+                )
+        );
+    }
+
+    /** 유저 결제 상태 변경 */
+    @PatchMapping("/payment/{userGameId}")
+    public ResponseEntity<ApiResponseDto<?>> updatePayment(
+            @PathVariable("userGameId") Long userGameId,
+            @RequestBody UserGamePaymentRequest request
+    ) {
+        adminPlayGameService.updatePayment(userGameId, request);
+        return ResponseEntity.ok(
+                ApiResponseDto.success(
+                        "PAY-204",
+                        "결제 상태 변경 완료",
+                        null
+                )
+        );
+    }
+
 
 
 }

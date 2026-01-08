@@ -38,22 +38,71 @@
     </insert>
 
 
-    <!-- 참가자 목록 조회 -->
+    <!-- 참가자 목록 조회 (회원 + 비회원) -->
     <select id="findPlayersByPlayGameId"
             parameterType="long"
             resultType="com.lapoit.api.dto.playgame.UserGamePlayerDto">
 
         SELECT
-        u.id             AS userId,
-        u.user_nickname  AS nickname,
-        u.user_name      AS name
+        ug.user_game_id AS userGameId,
+        ug.id AS userId,
+        u.user_nickname AS nickname,
+        CASE
+        WHEN ug.is_guest = 1 THEN ug.guest_name
+        ELSE u.user_name
+        END AS name,
+        ug.is_guest AS guest,
+
+        ug.payment_status AS paymentStatus,
+        ug.payment_method AS paymentMethod
+
         FROM user_game ug
-        JOIN user u
+        LEFT JOIN user u
         ON ug.id = u.id
         WHERE ug.play_game_id = #{playGameId}
-
+        ORDER BY ug.user_game_id ASC
     </select>
 
+
+
+    <update id="updatePayment">
+        UPDATE user_game
+        SET
+        is_paid = #{isPaid},
+        payment_method = #{paymentMethod},
+        payment_memo = #{paymentMemo},
+        paid_at = #{paidAt}
+        WHERE user_game_id = #{userGameId}
+    </update>
+
+
+
+    <select id="findByUserGameId"
+            resultType="com.lapoit.api.domain.UserGame">
+        SELECT
+        user_game_id    AS userGameId,
+        id              AS id,
+        play_game_id    AS playGameId,
+        game_id         AS gameId,
+        store_id        AS storeId,
+        attendance_date AS attendanceDate,
+        status,
+        rebuyin_count   AS rebuyinCount
+        FROM user_game
+        WHERE user_game_id = #{userGameId}
+    </select>
+
+
+
+
+    <insert id="insertGuestUserGame">
+        INSERT INTO user_game
+        (play_game_id, game_id, store_id, attendance_date,
+        is_guest, guest_name, status, rebuyin_count)
+        VALUES
+        (#{playGameId}, #{gameId}, #{storeId}, #{attendanceDate},
+        TRUE, #{guestName}, 'ALIVE', 0)
+    </insert>
 
 
 

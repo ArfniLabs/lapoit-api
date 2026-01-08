@@ -4,6 +4,7 @@ import com.lapoit.api.dto.ApiResponseDto;
 import com.lapoit.api.dto.playgame.AdminJoinGameRequest;
 import com.lapoit.api.dto.playgame.AdminPlayGameCreateRequest;
 import com.lapoit.api.dto.playgame.RebuyCancelRequest;
+import com.lapoit.api.dto.playgame.UserGamePaymentRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,11 +21,6 @@ public interface AdminPlayGameControllerDocs {
             description = "Create a new live game based on a template.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Play game created"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
-    })
     ResponseEntity<ApiResponseDto<?>> createPlayGame(AdminPlayGameCreateRequest request);
 
     @Operation(
@@ -32,107 +28,113 @@ public interface AdminPlayGameControllerDocs {
             description = "Start a live game.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Play game started"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Play game not found")
-    })
-    ResponseEntity<ApiResponseDto<?>> startPlayGame(@Parameter(description = "Play game ID") Long playGameId);
+    ResponseEntity<ApiResponseDto<?>> startPlayGame(
+            @Parameter(description = "Play game ID") Long playGameId
+    );
 
     @Operation(
             summary = "Pause play game",
             description = "Pause a live game.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Play game paused"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Play game not found")
-    })
-    ResponseEntity<ApiResponseDto<?>> pausePlayGame(@Parameter(description = "Play game ID") Long playGameId);
+    ResponseEntity<ApiResponseDto<?>> pausePlayGame(
+            @Parameter(description = "Play game ID") Long playGameId
+    );
 
     @Operation(
             summary = "Resume play game",
             description = "Resume a paused live game.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Play game resumed"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Play game not found")
-    })
-    ResponseEntity<ApiResponseDto<?>> resumePlayGame(@Parameter(description = "Play game ID") Long playGameId);
+    ResponseEntity<ApiResponseDto<?>> resumePlayGame(
+            @Parameter(description = "Play game ID") Long playGameId
+    );
 
     @Operation(
             summary = "Finish play game",
             description = "Finish a live game.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "205", description = "Play game finished"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Play game not found")
-    })
-    ResponseEntity<ApiResponseDto<?>> finishPlayGame(@Parameter(description = "Play game ID") Long playGameId);
+    ResponseEntity<ApiResponseDto<?>> finishPlayGame(
+            @Parameter(description = "Play game ID") Long playGameId
+    );
+
+    // =========================
+    // ✅ 플레이어 조작 (userGameId 기준)
+    // =========================
 
     @Operation(
             summary = "Mark player out",
-            description = "Set a player as out for a play game.",
+            description = """
+                Mark a player as OUT in a play game.
+                This API uses userGameId, not userId.
+                It supports both registered users and guest players.
+                """,
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "206", description = "Player marked out"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Play game or user not found")
-    })
     ResponseEntity<ApiResponseDto<?>> outPlayer(
             @Parameter(description = "Play game ID") Long playGameId,
-            @Parameter(description = "User ID") Long userId
+            @Parameter(description = "UserGame ID (player identifier)") Long userGameId
     );
 
     @Operation(
-            summary = "Rebuy",
-            description = "Apply a rebuy for a player.",
+            summary = "Rebuy player",
+            description = """
+                Apply a rebuy for a player.
+                This API uses userGameId, not userId.
+                It supports both registered users and guest players.
+                """,
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "210", description = "Rebuy applied"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Play game or user not found")
-    })
     ResponseEntity<?> rebuy(
             @Parameter(description = "Play game ID") Long playGameId,
-            @Parameter(description = "User ID") Long userId
+            @Parameter(description = "UserGame ID (player identifier)") Long userGameId
     );
 
     @Operation(
             summary = "Cancel rebuy",
-            description = "Cancel a rebuy for a player.",
+            description = """
+                Cancel the latest rebuy for a player.
+                This API uses userGameId, not userId.
+                """,
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Rebuy canceled"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Play game or user not found")
-    })
     ResponseEntity<ApiResponseDto<?>> cancelRebuy(
             @Parameter(description = "Play game ID") Long playGameId,
-            RebuyCancelRequest request
+            @Parameter(description = "UserGame ID (player identifier)") Long userGameId
     );
 
+    // =========================
+    // 참가
+    // =========================
+
     @Operation(
-            summary = "Join player",
-            description = "Add a player to a play game.",
+            summary = "Join registered user",
+            description = "Add a registered user to a play game.",
             security = { @SecurityRequirement(name = "bearer-jwt") }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Player joined"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Play game or user not found")
-    })
     ResponseEntity<ApiResponseDto<?>> joinUser(
             @Parameter(description = "Play game ID") Long playGameId,
             AdminJoinGameRequest request
     );
+
+    // =========================
+// 결제 상태 변경
+// =========================
+
+    @Operation(
+            summary = "Update player payment status",
+            description = """
+            Update payment status for a player in a play game.
+            This API uses userGameId, not playGameId.
+            """,
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    ResponseEntity<ApiResponseDto<?>> updatePayment(
+            @Parameter(description = "UserGame ID (player identifier)", required = true)
+            Long userGameId,
+            UserGamePaymentRequest request
+    );
+
+
 }

@@ -7,7 +7,12 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserGamePlayerDto {
 
+    private Long userGameId;
     private Long userId;
     private String nickname;
     private String name;
+    private boolean guest;
+
+    private String paymentStatus;   // PAID / UNPAID
+    private String paymentMethod;
 }
