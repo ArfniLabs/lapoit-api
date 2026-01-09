@@ -52,15 +52,16 @@
         ELSE u.user_name
         END AS name,
         ug.is_guest AS guest,
-
-        ug.payment_status AS paymentStatus,
-        ug.payment_method AS paymentMethod
-
+        ug.is_paid AS isPaid,
+        ug.paid_at AS paidAt,
+        ug.payment_method AS paymentMethod,
+        ug.payment_memo AS paymentMemo
         FROM user_game ug
         LEFT JOIN user u
         ON ug.id = u.id
         WHERE ug.play_game_id = #{playGameId}
         ORDER BY ug.user_game_id ASC
+
     </select>
 
 

@@ -12,7 +12,6 @@ public class LapoitApiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(LapoitApiApplication.class, args);
 
-
     }
 
 }
