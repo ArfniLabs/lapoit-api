@@ -54,6 +54,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 로그인/회원가입, Swagger, 기타 공개 API
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/store").permitAll()
+
                         .requestMatchers(
                                 "/api/v1/auth/signup",
                                 "/api/v1/auth/check-id",
